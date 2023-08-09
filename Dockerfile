@@ -23,10 +23,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
  && apt-get autoclean \
  && apt-get clean
 
-# for netskope clients locally
-COPY usr/local/share/ca-certificates/netskoperoot.crt /usr/local/share/ca-certificates/netskoperoot.crt
-RUN /usr/sbin/update-ca-certificates
-
 RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin
 
 # Set `calibre` as the entrypoint for the image

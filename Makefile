@@ -3,7 +3,7 @@ SHELL := /usr/bin/env bash
 # Docker repository for tagging and publishing
 DOCKER_REPO ?= localhost
 D2S_VERSION ?= v3.9.4
-EXPOSED_PORT ?= 8083
+EXPOSED_PORT ?= 8321
 
 # Date for log files
 LOGDATE := $(shell date +%F-%H%M)
