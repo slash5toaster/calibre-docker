@@ -3,6 +3,7 @@ From: debian:unstable-slim
 Stage: spython-base
 
 %files
+calibre_backups/calibre_backups.sh /usr/local/bin/calibre_backups.sh
 
 %labels
 project=slash5toaster

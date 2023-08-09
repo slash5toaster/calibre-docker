@@ -25,6 +25,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin
 
+COPY calibre_backups/calibre_backups.sh /usr/local/bin/calibre_backups.sh
+
 # Set `calibre` as the entrypoint for the image
 # ENTRYPOINT ["calibre"]
 
