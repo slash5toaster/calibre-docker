@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 6.24.0
+CALIBRE_VERSION ?= 5.44.0
 DOCKER_REPO ?= localhost
 D2S_VERSION ?= v3.9.4
 EXPOSED_PORT ?= 8321
@@ -71,7 +71,7 @@ singularity: local ## Create a singularity version.
 apptainer: ## Build an apptainer sif image directly
 	apptainer build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-            /tmp/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif calibre.def
+            /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif calibre.def
 
 run: ## run the image
 	[ "${C_IMAGES}" ] || \
