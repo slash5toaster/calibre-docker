@@ -2,6 +2,9 @@ Bootstrap: docker
 From: debian:unstable-slim
 Stage: spython-base
 
+%arguments
+    CALIBRE_VERSION=6.24.0
+
 %files
 calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 
@@ -9,7 +12,7 @@ calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 project=slash5toaster
 org.opencontainers.image.authors="slash5toaster@gmail.com"
 name=calibre
-version=6.24.0
+version={{ CALIBRE_VERSION }}
 generate_apptainer_image=true
 production=false
 
@@ -34,7 +37,7 @@ apt-get install -y \
 && apt-get autoclean \
 && apt-get clean
 
-wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin
+wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }}
 
 %runscript
 exec /bin/bash "$@"

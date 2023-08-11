@@ -1,5 +1,7 @@
 FROM debian:unstable-slim
 
+ARG CALIBRE_VERSION
+
 # Update OS to apply latest vulnerability fix
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -23,7 +25,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
  && apt-get autoclean \
  && apt-get clean
 
-RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin
+RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
 
 COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 

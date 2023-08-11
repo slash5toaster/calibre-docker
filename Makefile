@@ -1,6 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
+CALIBRE_VERSION ?= 6.24.0
 DOCKER_REPO ?= localhost
 D2S_VERSION ?= v3.9.4
 EXPOSED_PORT ?= 8321
@@ -43,6 +44,7 @@ local: ## Build the image locally.
 	mkdir -vp source/logs/ ; \
 	DOCKER_BUILDKIT=1 \
 	docker build . \
+			--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 			--cache-from $(CONTAINER_STRING) \
 			-t $(CONTAINER_STRING) \
 			--progress plain \
