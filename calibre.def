@@ -3,46 +3,46 @@ From: debian:unstable-slim
 Stage: spython-base
 
 %arguments
-    CALIBRE_VERSION=6.24.0
+   CALIBRE_VERSION=6.24.0
 
 %files
-calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
+   calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 
 %labels
-project=slash5toaster
-org.opencontainers.image.authors="slash5toaster@gmail.com"
-name=calibre
-version={{ CALIBRE_VERSION }}
-generate_apptainer_image=true
-production=false
-
+   project=slash5toaster
+   org.opencontainers.image.authors="slash5toaster@gmail.com"
+   name=calibre
+   version={{ CALIBRE_VERSION }}
+   generate_apptainer_image=true
+   production=false
+ 
 %post
-apt-get update && \
-apt-get install -y \
-    libegl1 \
-    libfontconfig \
-    libfontconfig1 \
-    libglx0 \
-    libopengl0 \
-    libxcb-icccm4 \
-    libxcb-image0 \
-    libxcb-keysyms1 \
-    libxcb-render-util0 \
-    libxcb-xinerama0 \
-    libxkbcommon-x11-0 \
-    qt6ct \
-    python3 \
-    wget \
-    xz-utils \
-&& apt-get autoclean \
-&& apt-get clean
+   apt-get update && \
+   apt-get install -y \
+       libegl1 \
+       libfontconfig \
+       libfontconfig1 \
+       libglx0 \
+       libopengl0 \
+       libxcb-icccm4 \
+       libxcb-image0 \
+       libxcb-keysyms1 \
+       libxcb-render-util0 \
+       libxcb-xinerama0 \
+       libxkbcommon-x11-0 \
+       qt6ct \
+       python3 \
+       wget \
+       xz-utils \
+   && apt-get autoclean \
+   && apt-get clean
 
-wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }}
+   wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }}
 
 %runscript
-exec /bin/bash "$@"
+   exec "$@"
 
 %startscript
-exec /bin/bash "$@"
+   exec "$@"
 
 #### End of File, if this is missing the file has been truncated
