@@ -68,6 +68,11 @@ singularity: local ## Create a singularity version.
 			--rm \
 			quay.io/singularity/docker2singularity:$(D2S_VERSION) \
 			$(CONTAINER_STRING)
+apptainer: ## Build an apptainer sif image directly
+	apptainer build \
+            --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
+            /tmp/$(CONTAINER_NAME)-$(CONTAINER_TAG).sif calibre.def
+
 run: ## run the image
 	[ "${C_IMAGES}" ] || \
 		make local
