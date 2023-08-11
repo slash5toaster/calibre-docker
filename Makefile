@@ -71,7 +71,7 @@ singularity: local ## Create a singularity version.
 apptainer: ## Build an apptainer sif image directly
 	apptainer build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-            /tmp/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif calibre.def
+            /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif calibre.def
 
 run: ## run the image
 	[ "${C_IMAGES}" ] || \
