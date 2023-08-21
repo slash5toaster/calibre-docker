@@ -36,7 +36,7 @@ COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 LABEL project=slash5toaster
 LABEL org.opencontainers.image.authors="slash5toaster@gmail.com"
 LABEL name=calibre
-LABEL version=6.24.0
+LABEL version=6.25.0
 LABEL generate_apptainer_image=true
 LABEL production=false
 
