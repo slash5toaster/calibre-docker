@@ -13,9 +13,8 @@ Stage: spython-base
    org.opencontainers.image.authors="slash5toaster@gmail.com"
    name=calibre
    version={{ CALIBRE_VERSION }}
-   generate_apptainer_image=true
    production=false
- 
+
 %post
    apt-get update && \
    apt-get install -y \

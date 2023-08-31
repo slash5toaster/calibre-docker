@@ -38,6 +38,6 @@ LABEL org.opencontainers.image.authors="slash5toaster@gmail.com"
 LABEL name=calibre
 LABEL version=6.25.0
 LABEL generate_apptainer_image=true
-LABEL production=false
+LABEL production=true
 
 #### End of File, if this is missing the file has been truncated
