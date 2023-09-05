@@ -3,7 +3,7 @@ From: debian:unstable-slim
 Stage: spython-base
 
 %arguments
-   CALIBRE_VERSION=6.25.0
+   CALIBRE_VERSION=6.25.1
 
 %files
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
@@ -32,6 +32,12 @@ Stage: spython-base
        qt6ct \
        python3 \
        wget \
+       xfonts-intl-arabic \
+       xfonts-intl-asian \
+       xfonts-intl-chinese \
+       xfonts-intl-european \
+       xfonts-intl-japanese \
+       xfonts-intl-phonetic \
        xz-utils \
    && apt-get autoclean \
    && apt-get clean

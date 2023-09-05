@@ -18,9 +18,15 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libxcb-render-util0 \
         libxcb-xinerama0 \
         libxkbcommon-x11-0 \
-        qt6ct \
         python3 \
+        qt6ct \
         wget \
+        xfonts-intl-arabic \
+        xfonts-intl-asian \
+        xfonts-intl-chinese \
+        xfonts-intl-european \
+        xfonts-intl-japanese \
+        xfonts-intl-phonetic \
         xz-utils \
  && apt-get autoclean \
  && apt-get clean
