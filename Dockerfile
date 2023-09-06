@@ -11,6 +11,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update \
  && apt-get install -y --no-install-recommends \
+        ca-certificates \
         libegl1 \
         libfontconfig \
         libfontconfig1 \
@@ -23,6 +24,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libxcb-xinerama0 \
         libxkbcommon-x11-0 \
         python3 \
+        python3-pip \
         qt6ct \
         wget \
         xfonts-intl-arabic \

@@ -16,8 +16,9 @@ Stage: spython-base
    production=false
 
 %post
-   apt-get update && \
-   apt-get install -y --no-install-recommends \
+    apt-get update \
+ && apt-get install -y --no-install-recommends \
+       ca-certificates \
        libegl1 \
        libfontconfig \
        libfontconfig1 \
@@ -29,8 +30,9 @@ Stage: spython-base
        libxcb-render-util0 \
        libxcb-xinerama0 \
        libxkbcommon-x11-0 \
-       qt6ct \
        python3 \
+       python3-pip \
+       qt6ct \
        wget \
        xfonts-intl-arabic \
        xfonts-intl-asian \
