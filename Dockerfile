@@ -16,17 +16,28 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libfontconfig \
         libfontconfig1 \
         libglx0 \
+        libnss3-dev \
         libopengl0 \
         libxcb-icccm4 \
         libxcb-image0 \
         libxcb-keysyms1 \
         libxcb-render-util0 \
         libxcb-xinerama0 \
+        libxcomposite-dev \
+        libxdamage-dev \
+        libxi6 \
         libxkbcommon-x11-0 \
+        libxkbfile-dev \
+        libxrandr-dev \
+        libxrender1 \
+        libxtst6 \
         python3 \
         python3-pip \
         qt6ct \
         wget \
+        xdg-desktop-portal-dev \
+        xdg-desktop-portal-xapp \
+        xdg-utils \
         xfonts-intl-arabic \
         xfonts-intl-asian \
         xfonts-intl-chinese \
@@ -36,6 +47,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xz-utils \
  && apt-get autoclean \
  && apt-get clean
+
+ RUN mkdir -vp /usr/share/desktop-directories/
 
 RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
 
