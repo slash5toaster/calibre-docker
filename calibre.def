@@ -3,7 +3,7 @@ From: debian:unstable-slim
 Stage: spython-base
 
 %arguments
-   CALIBRE_VERSION=6.25.0
+   CALIBRE_VERSION=6.26.0
 
 %files
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
@@ -17,31 +17,33 @@ Stage: spython-base
 
 %post
     apt-get update \
- && apt-get install -y --no-install-recommends \
+ && apt-get install -y \
         ca-certificates \
         libegl1 \
         libfontconfig \
         libfontconfig1 \
         libglx0 \
-        libnss3-dev \
         libopengl0 \
         libxcb-icccm4 \
         libxcb-image0 \
         libxcb-keysyms1 \
         libxcb-render-util0 \
         libxcb-xinerama0 \
-        libxcomposite-dev \
-        libxdamage-dev \
-        libxi6 \
         libxkbcommon-x11-0 \
-        libxkbfile-dev \
-        libxrandr-dev \
-        libxrender1 \
-        libxtst6 \
         python3 \
         python3-pip \
         qt6ct \
         wget \
+        xz-utils \
+ && apt-get install -y --no-install-recommends \
+        libnss3-dev \
+        libxcomposite-dev \
+        libxdamage-dev \
+        libxi6 \
+        libxkbfile-dev \
+        libxrandr-dev \
+        libxrender1 \
+        libxtst6 \
         xdg-desktop-portal-dev \
         xdg-desktop-portal-xapp \
         xdg-utils \
@@ -51,7 +53,6 @@ Stage: spython-base
         xfonts-intl-european \
         xfonts-intl-japanese \
         xfonts-intl-phonetic \
-        xz-utils \
  && apt-get autoclean \
  && apt-get clean
 

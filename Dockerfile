@@ -16,33 +16,35 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libfontconfig \
         libfontconfig1 \
         libglx0 \
-        libnss3-dev \
         libopengl0 \
         libxcb-icccm4 \
         libxcb-image0 \
         libxcb-keysyms1 \
         libxcb-render-util0 \
         libxcb-xinerama0 \
-        libxcomposite-dev \
-        libxdamage-dev \
-        libxi6 \
         libxkbcommon-x11-0 \
-        libxkbfile-dev \
-        libxrandr-dev \
-        libxrender1 \
-        libxtst6 \
         python3 \
         python3-pip \
         qt6ct \
         wget \
-        xdg-desktop-portal-dev \
-        xdg-desktop-portal-xapp \
+        xz-utils \
+ && apt-get install -y --no-install-recommends \
+        libxkbfile-dev \
+        libxrandr-dev \
+        libxrender1 \
+        libxtst6 \
+        libnss3-dev \
+        libxcomposite-dev \
+        libxdamage-dev \
+        libxi6 \
         xdg-utils \
         xfonts-intl-arabic \
         xfonts-intl-asian \
         xfonts-intl-chinese \
         xfonts-intl-european \
         xfonts-intl-japanese \
+        xdg-desktop-portal-dev \
+        xdg-desktop-portal-xapp \
         xfonts-intl-phonetic \
         xz-utils \
  && apt-get autoclean \
@@ -61,7 +63,7 @@ COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 LABEL project=slash5toaster
 LABEL org.opencontainers.image.authors="slash5toaster@gmail.com"
 LABEL name=calibre
-LABEL version=6.25.0
+LABEL version=6.26.0
 LABEL generate_apptainer_image=true
 LABEL production=true
 
