@@ -10,7 +10,7 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloa
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update \
- && apt-get install -y --no-install-recommends \
+ && apt-get install -y \
         ca-certificates \
         libegl1 \
         libfontconfig \
