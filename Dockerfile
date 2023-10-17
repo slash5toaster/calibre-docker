@@ -29,24 +29,24 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         wget \
         xz-utils \
  && apt-get install -y --no-install-recommends \
-        libxkbfile-dev \
-        libxrandr-dev \
-        libxrender1 \
-        libxtst6 \
+        fonts-noto-cjk \
         libnss3-dev \
         libxcomposite-dev \
         libxdamage-dev \
         libxi6 \
+        libxkbfile-dev \
+        libxrandr-dev \
+        libxrender1 \
+        libxtst6 \
+        xdg-desktop-portal-dev \
+        xdg-desktop-portal-xapp \
         xdg-utils \
         xfonts-intl-arabic \
         xfonts-intl-asian \
         xfonts-intl-chinese \
         xfonts-intl-european \
         xfonts-intl-japanese \
-        xdg-desktop-portal-dev \
-        xdg-desktop-portal-xapp \
         xfonts-intl-phonetic \
-        xz-utils \
  && apt-get autoclean \
  && apt-get clean
 
