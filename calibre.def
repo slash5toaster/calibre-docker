@@ -3,7 +3,7 @@ From: debian:unstable-slim
 Stage: spython-base
 
 %arguments
-   CALIBRE_VERSION=6.27.0
+   CALIBRE_VERSION=6.28.1
 
 %files
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
@@ -36,6 +36,7 @@ Stage: spython-base
         wget \
         xz-utils \
  && apt-get install -y --no-install-recommends \
+        fonts-noto-cjk \
         libnss3-dev \
         libxcomposite-dev \
         libxdamage-dev \
