@@ -3,7 +3,7 @@ From: debian:unstable-slim
 Stage: spython-base
 
 %arguments
-   CALIBRE_VERSION=6.28.1
+   CALIBRE_VERSION=6.29.0
 
 %files
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh

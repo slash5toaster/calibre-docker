@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 6.28.1
+CALIBRE_VERSION ?= 6.29.0
 DOCKER_REPO ?= localhost
 D2S_VERSION ?= v3.9.4
 EXPOSED_PORT ?= 8321
