@@ -17,6 +17,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libfontconfig1 \
         libglx0 \
         libopengl0 \
+        libxcb-cursor0 \
         libxcb-icccm4 \
         libxcb-image0 \
         libxcb-keysyms1 \
