@@ -56,9 +56,6 @@ destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          docker rmi $(CONTAINER_STRING)
 
-remote: ## Push the image to remote.
-	$(MAKE) local
-
 singularity: local ## Create a singularity version.
 	docker run \
 			-v /var/run/docker.sock:/var/run/docker.sock \
@@ -68,6 +65,7 @@ singularity: local ## Create a singularity version.
 			--rm \
 			quay.io/singularity/docker2singularity:$(D2S_VERSION) \
 			$(CONTAINER_STRING)
+
 apptainer: ## Build an apptainer sif image directly
 	apptainer build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
@@ -103,7 +101,9 @@ kill: ## shutdown
 	docker rm $(CONTAINER_NAME)
 
 publish: ## Push server image to remote
-	@echo 'pushing server-$(VERSION) to $(DOCKER_REPO)'
+	[ "${C_IMAGES}" ] || \
+		make local
+	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'
 	docker push $(CONTAINER_STRING)
 
 docker-lint: ## Check files for errors
