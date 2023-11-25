@@ -56,16 +56,6 @@ destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          docker rmi $(CONTAINER_STRING)
 
-singularity: local ## Create a singularity version.
-	docker run \
-          -v /var/run/docker.sock:/var/run/docker.sock \
-          -v $(shell pwd)/source:/output \
-          --privileged \
-          -t \
-          --rm \
-          quay.io/singularity/docker2singularity:$(D2S_VERSION) \
-          $(CONTAINER_STRING)
-
 apptainer: ## Build an apptainer sif image directly
 	apptainer build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
