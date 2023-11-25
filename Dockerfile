@@ -13,7 +13,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
  && apt-get install -y \
         ca-certificates \
         libegl1 \
-        libfontconfig \
         libfontconfig1 \
         libglx0 \
         libopengl0 \
@@ -24,9 +23,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libxcb-render-util0 \
         libxcb-xinerama0 \
         libxkbcommon-x11-0 \
+        locales \
         python3 \
         python3-pip \
         qt6ct \
+        vim-tiny \
         wget \
         xz-utils \
  && apt-get install -y --no-install-recommends \
@@ -53,9 +54,14 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
  RUN mkdir -vp /usr/share/desktop-directories/
 
+# set the locale to en_US.UTF-8
+ RUN locale-gen && \
+     /usr/sbin/update-locale LC_ALL=C.utf8
+
 RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
 
 COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
+
 
 # Set `calibre` as the entrypoint for the image
 # ENTRYPOINT ["calibre"]
