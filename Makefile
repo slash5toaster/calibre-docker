@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 7.0.0
+CALIBRE_VERSION ?= 7.1.0
 DOCKER_REPO ?= localhost
 D2S_VERSION ?= v3.9.4
 EXPOSED_PORT ?= 8321
@@ -56,16 +56,6 @@ destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          docker rmi $(CONTAINER_STRING)
 
-singularity: local ## Create a singularity version.
-	docker run \
-			-v /var/run/docker.sock:/var/run/docker.sock \
-			-v $(shell pwd)/source:/output \
-			--privileged \
-			-t \
-			--rm \
-			quay.io/singularity/docker2singularity:$(D2S_VERSION) \
-			$(CONTAINER_STRING)
-
 apptainer: ## Build an apptainer sif image directly
 	apptainer build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
@@ -74,31 +64,16 @@ apptainer: ## Build an apptainer sif image directly
 run: ## run the image
 	[ "${C_IMAGES}" ] || \
 		make local
-	[ "${C_ID}" ] || \
 	docker run \
-		--rm \
-		--detach \
-		-e TZ=PST8PDT \
-		-v "$(shell pwd)":/opt/devel \
-		--name $(CONTAINER_NAME) \
-		--hostname=$(CONTAINER_NAME)-$(CONTAINER_TAG) \
-		--publish $(EXPOSED_PORT):$(EXPOSED_PORT) \
-			$(CONTAINER_STRING)
-
-shell: run ## shell in server image.
-	[ "${C_ID}" ] || \
-		make run
-	docker exec \
-		-it \
-		-e DEBUG=0 \
-		-e TZ=PST8PDT \
-		--user root:root \
-		$(CONTAINER_NAME) /bin/bash
-
-kill: ## shutdown
-	[ "${C_ID}" ] || \
-	docker kill $(CONTAINER_NAME) && \
-	docker rm $(CONTAINER_NAME)
+          --rm \
+          -it \
+          -e TZ=PST8PDT \
+          --entrypoint /bin/bash \
+          -v "$(shell pwd)":/opt/devel \
+          --name $(CONTAINER_NAME) \
+          --hostname=$(CONTAINER_NAME) \
+          --publish $(EXPOSED_PORT):$(EXPOSED_PORT) \
+          $(CONTAINER_STRING)
 
 publish: ## Push server image to remote
 	[ "${C_IMAGES}" ] || \

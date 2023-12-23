@@ -3,7 +3,7 @@ From: debian:unstable-slim
 Stage: spython-base
 
 %arguments
-   CALIBRE_VERSION=7.0.0
+   CALIBRE_VERSION=7.1.0
 
 %files
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
@@ -13,14 +13,12 @@ Stage: spython-base
    org.opencontainers.image.authors="slash5toaster@gmail.com"
    name=calibre
    version={{ CALIBRE_VERSION }}
-   production=false
 
 %post
     apt-get update \
  && apt-get install -y \
         ca-certificates \
         libegl1 \
-        libfontconfig \
         libfontconfig1 \
         libglx0 \
         libopengl0 \
@@ -31,9 +29,11 @@ Stage: spython-base
         libxcb-render-util0 \
         libxcb-xinerama0 \
         libxkbcommon-x11-0 \
+        locales \
         python3 \
         python3-pip \
         qt6ct \
+        vim-tiny \
         wget \
         xz-utils \
  && apt-get install -y --no-install-recommends \
@@ -59,6 +59,9 @@ Stage: spython-base
  && apt-get clean
 
     mkdir -vp /usr/share/desktop-directories/
+    locale-gen
+    /usr/sbin/update-locale LC_ALL=C.utf8
+
     wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }}
 
 %runscript
