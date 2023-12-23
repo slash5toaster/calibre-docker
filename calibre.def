@@ -64,6 +64,10 @@ Stage: spython-base
 
     wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }}
 
+%test
+   type calibre || exit 1
+   calibre --version
+
 %runscript
    exec "$@"
 
