@@ -52,10 +52,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
  && apt-get autoclean \
  && apt-get clean
 
- RUN mkdir -vp /usr/share/desktop-directories/
+RUN mkdir -vp /usr/share/desktop-directories/
 
 # set the locale to en_US.UTF-8
- RUN locale-gen && \
+RUN locale-gen && \
      /usr/sbin/update-locale LC_ALL=C.utf8
 
 RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
