@@ -37,7 +37,9 @@ steps:
     args:
       - "-c"
       - |
-        git checkout $TAG_NAME || git checkout $COMMIT_SHA ;\
+        git submodule init
+        git submodule update --recursive
+        git checkout $TAG_NAME || git checkout $COMMIT_SHA
         make local
     env:
       - 'DOCKER_BUILDKIT=1'
