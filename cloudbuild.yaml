@@ -37,9 +37,9 @@ steps:
   # Docker Build
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: "bash"
-    script:
+    args:
+      - "-c"
       - |
-        #!/usr/bin/env bash
         git checkout $TAG_NAME || git checkout $COMMIT_SHA
         git submodule update --recursive
         make local
