@@ -12,6 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Cloud Build provides the following default substitutions for all builds:
+# $PROJECT_ID: ID of your Cloud project
+# $BUILD_ID: ID of your build
+# $PROJECT_NUMBER: your project number
+# $LOCATION: the region associated with your build
+# $BUILD_TRIGGER_NAME: the name of the trigger that started your build
+# Cloud Build provides the following default substitutions for builds invoked by triggers:
+# $TRIGGER_NAME: the name associated with your trigger
+# $COMMIT_SHA: the commit ID associated with your build
+# $REVISION_ID: the commit ID associated with your build
+# $SHORT_SHA : the first seven characters of COMMIT_SHA
+# $REPO_NAME: the name of your repository
+# $REPO_FULL_NAME: the full name of your repository, including either the user or organization
+# $BRANCH_NAME: the name of your branch
+# $TAG_NAME: the name of your tag
+# $REF_NAME: the name of your branch or tag
+
 # [START cloudbuild_basic_config]
 steps:
   # Docker Build
@@ -20,7 +37,7 @@ steps:
     args:
       - "-c"
       - |
-        pwd; ls -l ;\
+        git checkout $TAG_NAME || git checkout $COMMIT_SHA ;\
         make local
     env:
       - 'DOCKER_BUILDKIT=1'
