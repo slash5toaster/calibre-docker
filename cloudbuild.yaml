@@ -20,7 +20,7 @@ steps:
     args:
       - "-c"
       - |
-        git pull --recurse-submodules ;\
+        pwd; ls -l ;\
         make local
     env:
       - 'DOCKER_BUILDKIT=1'
