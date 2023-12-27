@@ -32,7 +32,7 @@
 # [START cloudbuild_basic_config]
 steps:
   - name: 'gcr.io/cloud-builders/git'
-    args: ['submodule', 'update', '--init', '--recursive', '--remote']
+    args: ['submodule', 'update', '--recursive', '--remote']
 
   # Docker Build
   - name: 'gcr.io/cloud-builders/docker'
