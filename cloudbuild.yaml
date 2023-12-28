@@ -40,7 +40,7 @@ steps:
     args:
       - "-c"
       - |
-        git checkout $TAG_NAME || git checkout $COMMIT_SHA ;\
+        git checkout --recurse-submodules $TAG_NAME || git checkout --recurse-submodules $COMMIT_SHA ;\
         make local
     env:
       - 'DOCKER_BUILDKIT=1'
