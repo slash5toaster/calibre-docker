@@ -1,9 +1,8 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 7.1.0
+CALIBRE_VERSION ?= 7.2.0
 DOCKER_REPO ?= localhost
-D2S_VERSION ?= v3.9.4
 EXPOSED_PORT ?= 8321
 
 # Date for log files
@@ -41,6 +40,7 @@ envs: ## show the environments
 	$(shell echo -e "${CONTAINER_STRING}\n\t${CONTAINER_PROJECT}\n\t${CONTAINER_NAME}\n\t${CONTAINER_TAG}")
 
 local: ## Build the image locally.
+	git pull --recurse-submodules;\
 	mkdir -vp source/logs/ ; \
 	DOCKER_BUILDKIT=1 \
 	docker build . \
