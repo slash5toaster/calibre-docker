@@ -12,13 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Cloud Build provides the following default substitutions for all builds:
+# $PROJECT_ID: ID of your Cloud project
+# $BUILD_ID: ID of your build
+# $PROJECT_NUMBER: your project number
+# $LOCATION: the region associated with your build
+# $BUILD_TRIGGER_NAME: the name of the trigger that started your build
+# Cloud Build provides the following default substitutions for builds invoked by triggers:
+# $TRIGGER_NAME: the name associated with your trigger
+# $COMMIT_SHA: the commit ID associated with your build
+# $REVISION_ID: the commit ID associated with your build
+# $SHORT_SHA : the first seven characters of COMMIT_SHA
+# $REPO_NAME: the name of your repository
+# $REPO_FULL_NAME: the full name of your repository, including either the user or organization
+# $BRANCH_NAME: the name of your branch
+# $TAG_NAME: the name of your tag
+# $REF_NAME: the name of your branch or tag
+
 # [START cloudbuild_basic_config]
 steps:
+  - name: 'gcr.io/cloud-builders/git'
+    args: ['submodule', 'update', '--recursive', '--remote']
+
   # Docker Build
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t',
-           'us-central1-docker.pkg.dev/${PROJECT_ID}/slash5toaster/calibre',
-           '.']
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        git checkout --recurse-submodules $TAG_NAME || git checkout --recurse-submodules $COMMIT_SHA ;\
+        make local
+    env:
+      - 'DOCKER_BUILDKIT=1'
 
   # Docker Push
   - name: 'gcr.io/cloud-builders/docker'
@@ -36,5 +61,4 @@ steps:
     env:
       - 'CLOUDSDK_COMPUTE_REGION=us-central1'
       - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
-      - 'DOCKER_BUILDKIT=1'
 # [END cloudbuild_basic_config]
