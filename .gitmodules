@@ -1,3 +1,4 @@
 [submodule "calibre_backups"]
 	path = calibre_backups
 	url = git@github.com:slash5toaster/calibre_backups.git
+#	url = https://github.com/slash5toaster/calibre-docker.git
