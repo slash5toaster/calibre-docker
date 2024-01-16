@@ -40,6 +40,7 @@ envs: ## show the environments
 	$(shell echo -e "${CONTAINER_STRING}\n\t${CONTAINER_PROJECT}\n\t${CONTAINER_NAME}\n\t${CONTAINER_TAG}")
 
 local: ## Build the image locally.
+	$(call run_hadolint)
 	git pull --recurse-submodules;\
 	mkdir -vp source/logs/ ; \
 	DOCKER_BUILDKIT=1 \

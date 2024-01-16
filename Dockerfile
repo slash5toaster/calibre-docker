@@ -62,7 +62,6 @@ RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev
 
 COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 
-
 # Set `calibre` as the entrypoint for the image
 # ENTRYPOINT ["calibre"]
 
