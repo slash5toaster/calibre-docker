@@ -1,6 +1,0 @@
-pip
-wheel
-calibreweb
-calibreweb[gmail]
-calibreweb[goodreads]
-calibreweb[oauth]
