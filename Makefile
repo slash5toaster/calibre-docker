@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 7.2.0
+CALIBRE_VERSION ?= 7.3.0
 DOCKER_REPO ?= localhost
 EXPOSED_PORT ?= 8321
 
@@ -40,6 +40,7 @@ envs: ## show the environments
 	$(shell echo -e "${CONTAINER_STRING}\n\t${CONTAINER_PROJECT}\n\t${CONTAINER_NAME}\n\t${CONTAINER_TAG}")
 
 local: ## Build the image locally.
+	$(call run_hadolint)
 	git pull --recurse-submodules;\
 	mkdir -vp source/logs/ ; \
 	DOCKER_BUILDKIT=1 \
