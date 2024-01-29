@@ -18,6 +18,7 @@ Stage: spython-base
     apt-get update \
  && apt-get install -y \
         ca-certificates \
+        mailcap \
         libegl1 \
         libfontconfig1 \
         libglx0 \
@@ -46,6 +47,8 @@ Stage: spython-base
         libxrandr-dev \
         libxrender1 \
         libxtst6 \
+        xpdf \
+        xpdf-utils \
         xdg-desktop-portal-dev \
         xdg-desktop-portal-xapp \
         xdg-utils \
@@ -63,6 +66,8 @@ Stage: spython-base
     /usr/sbin/update-locale LC_ALL=C.utf8
 
     wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }}
+
+    xdg-mime default xpdf.desktop application/pdf
 
 %test
    type calibre || exit 1
