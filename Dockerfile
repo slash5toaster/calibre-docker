@@ -69,6 +69,6 @@ COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 LABEL project=slash5toaster
 LABEL org.opencontainers.image.authors="slash5toaster@gmail.com"
 LABEL name=calibre
-LABEL version=7.4.0
+LABEL version=7.5.1
 
 #### End of File, if this is missing the file has been truncated
