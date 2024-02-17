@@ -45,14 +45,25 @@ local: ## Build the image locally.
 	mkdir -vp source/logs/ ; \
 	DOCKER_BUILDKIT=1 \
 	docker build . \
-			--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-			--cache-from $(CONTAINER_STRING) \
-			-t $(CONTAINER_STRING) \
-			--progress plain \
-			--label BUILDDATE=$(LOGDATE) 2>&1 \
+		-t $(CONTAINER_STRING) \
+		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
+		--cache-from $(CONTAINER_STRING) \
+		--progress plain \
+		--label BUILDDATE=$(LOGDATE) 2>&1 \
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	docker inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
+docker-multi: ## Build multiplatform
+	mkdir -vp  source/logs/ ; \
+	docker buildx build --no-cache --platform linux/amd64,linux/arm64/v8 . \
+		-t $(CONTAINER_STRING) \
+		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
+		--label BUILDDATE=$(shell date +%F-%H%M) \
+		--cache-from $(CONTAINER_STRING) \
+		--progress plain \
+		--push
+
+run-docker: ## launch shell into the container, with this directory mounted to /opt/source
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          docker rmi $(CONTAINER_STRING)
