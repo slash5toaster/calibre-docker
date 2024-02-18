@@ -51,16 +51,20 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xfonts-intl-phonetic \
  && apt-get autoclean \
  && apt-get clean
-
+ 
 RUN mkdir -vp /usr/share/desktop-directories/
 
 # set the locale to en_US.UTF-8
 RUN locale-gen && \
      /usr/sbin/update-locale LC_ALL=C.utf8
 
-RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
+WORKDIR /tmp/build/
+RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
+     wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
 
 COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
+
+WORKDIR /opt/Books
 
 # Set `calibre` as the entrypoint for the image
 # ENTRYPOINT ["calibre"]
