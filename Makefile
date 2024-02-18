@@ -61,7 +61,6 @@ docker-multi: ## Build multiplatform
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--label BUILDDATE=$(shell date +%F-%H%M) \
-		--cache-from $(CONTAINER_STRING) \
 		--progress plain \
 		--push 2>&1 \
 	| tee source/logs/build-multi-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
