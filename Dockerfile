@@ -70,9 +70,9 @@ WORKDIR /opt/Books
 # ENTRYPOINT ["calibre"]
 
 # Mandatory Labels
-LABEL project=slash5toaster
-LABEL org.opencontainers.image.authors="slash5toaster@gmail.com"
-LABEL name=calibre
-LABEL version=7.5.1
+LABEL org.opencontainers.image.vendor=slash5toaster \
+      org.opencontainers.image.authors="slash5toaster@gmail.com" \
+      org.opencontainers.image.ref.name=calibre \
+      org.opencontainers.image.version=7.5.1
 
 #### End of File, if this is missing the file has been truncated

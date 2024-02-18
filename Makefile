@@ -9,9 +9,9 @@ EXPOSED_PORT ?= 8321
 LOGDATE := $(shell date +%F-%H%M)
 
 # pull the name from the docker file - these labels *MUST* be set
-CONTAINER_PROJECT ?= $(shell grep LABEL Dockerfile | grep -i project | cut -d = -f2 | tr -d '"')
-CONTAINER_NAME ?= $(shell grep LABEL Dockerfile | grep -i name | cut -d = -f2 | tr -d '"')
-CONTAINER_TAG ?= $(shell grep LABEL Dockerfile | grep -i version | cut -d = -f2| tr -d '"')
+CONTAINER_PROJECT ?= $(shell grep org.opencontainers.image.vendor Dockerfile | cut -d = -f2 |  tr -d '" \')
+CONTAINER_NAME ?= $(shell grep org.opencontainers.image.ref.name Dockerfile  | cut -d = -f2 |  tr -d '" \')
+CONTAINER_TAG ?= $(shell grep org.opencontainers.image.version Dockerfile    | cut -d = -f2 |  tr -d '" \')
 CONTAINER_STRING ?= $(CONTAINER_PROJECT)/$(CONTAINER_NAME):$(CONTAINER_TAG)
 
 C_ID = $(shell ${GET_ID})
@@ -58,7 +58,7 @@ docker-multi: ## Build multiplatform
 	docker buildx build --no-cache --platform linux/amd64,linux/arm64/v8 . \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-		--label BUILDDATE=$(shell date +%F-%H%M) \
+		--label org.opencontainers.image.created=$(shell date +%F-%H%M) \
 		--cache-from $(CONTAINER_STRING) \
 		--progress plain \
 		--push
