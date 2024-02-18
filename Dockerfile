@@ -1,13 +1,15 @@
 FROM debian:unstable-slim
 
-ARG CALIBRE_VERSION=7.2.0
+ARG CALIBRE_VERSION
 
 # Otherwize you will get an interactive setup session
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
-RUN apt-get update \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update \
  && apt-get install -y \
         ca-certificates \
         libegl1 \
@@ -60,7 +62,6 @@ RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev
 
 COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 
-
 # Set `calibre` as the entrypoint for the image
 # ENTRYPOINT ["calibre"]
 
@@ -68,6 +69,6 @@ COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 LABEL project=slash5toaster
 LABEL org.opencontainers.image.authors="slash5toaster@gmail.com"
 LABEL name=calibre
-LABEL version=7.2.0
+LABEL version=7.4.0
 
 #### End of File, if this is missing the file has been truncated
