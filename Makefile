@@ -63,7 +63,10 @@ docker-multi: ## Build multiplatform
 		--progress plain \
 		--push
 
-run-docker: ## launch shell into the container, with this directory mounted to /opt/source
+setup-multi: ##setup docker multiplatform
+    docker buildx create --name buildx-multi-arch ;\
+    docker buildx use buildx-multi-arch
+
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          docker rmi $(CONTAINER_STRING)
