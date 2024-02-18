@@ -39,19 +39,35 @@ help: ## This help.
 envs: ## show the environments
 	$(shell echo -e "${CONTAINER_STRING}\n\t${CONTAINER_PROJECT}\n\t${CONTAINER_NAME}\n\t${CONTAINER_TAG}")
 
-local: ## Build the image locally.
+docker: ## Build the docker image locally.
 	$(call run_hadolint)
 	git pull --recurse-submodules;\
 	mkdir -vp source/logs/ ; \
 	DOCKER_BUILDKIT=1 \
 	docker build . \
-			--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-			--cache-from $(CONTAINER_STRING) \
-			-t $(CONTAINER_STRING) \
-			--progress plain \
-			--label BUILDDATE=$(LOGDATE) 2>&1 \
+		-t $(CONTAINER_STRING) \
+		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
+		--cache-from $(CONTAINER_STRING) \
+		--progress plain \
+		--label BUILDDATE=$(LOGDATE) 2>&1 \
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	docker inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
+
+docker-multi: ## Build multiplatform
+	$(call run_hadolint)
+	git pull --recurse-submodules; \
+	mkdir -vp  source/logs/ ; \
+	docker buildx build --no-cache --platform linux/amd64,linux/arm64/v8 . \
+		-t $(CONTAINER_STRING) \
+		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
+		--label BUILDDATE=$(shell date +%F-%H%M) \
+		--cache-from $(CONTAINER_STRING) \
+		--progress plain \
+		--push 2>&1 \
+	| tee source/logs/build-multi-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
+
+setup-multi: ## setup docker multiplatform
+	docker buildx create --name buildx-multi-arch ; docker buildx use buildx-multi-arch
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
