@@ -63,9 +63,8 @@ docker-multi: ## Build multiplatform
 		--progress plain \
 		--push
 
-setup-multi: ##setup docker multiplatform
-    docker buildx create --name buildx-multi-arch ;\
-    docker buildx use buildx-multi-arch
+setup-multi: ## setup docker multiplatform
+	docker buildx create --name buildx-multi-arch ; docker buildx use buildx-multi-arch
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
