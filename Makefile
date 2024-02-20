@@ -53,6 +53,9 @@ local: ## Build the image locally.
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	docker inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
+setup-multi: ##setup docker multiplatform
+	docker buildx create --name buildx-multi-arch ; docker buildx use buildx-multi-arch
+
 docker-multi: ## Build multiplatform
 	mkdir -vp  source/logs/ ; \
 	docker buildx build --no-cache --platform linux/amd64,linux/arm64/v8 . \
@@ -62,9 +65,6 @@ docker-multi: ## Build multiplatform
 		--cache-from $(CONTAINER_STRING) \
 		--progress plain \
 		--push
-
-setup-multi: ## setup docker multiplatform
-	docker buildx create --name buildx-multi-arch ; docker buildx use buildx-multi-arch
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
@@ -78,6 +78,7 @@ apptainer: ## Build an apptainer sif image directly
 run: ## run the image
 	[ "${C_IMAGES}" ] || \
 		make local
+	[ "${C_ID}" ] || \
 	docker run \
           --rm \
           -it \
