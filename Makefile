@@ -39,7 +39,7 @@ help: ## This help.
 envs: ## show the environments
 	$(shell echo -e "${CONTAINER_STRING}\n\t${CONTAINER_PROJECT}\n\t${CONTAINER_NAME}\n\t${CONTAINER_TAG}")
 
-local: ## Build the image locally.
+docker: ## Build the docker image locally.
 	$(call run_hadolint)
 	git pull --recurse-submodules;\
 	mkdir -vp source/logs/ ; \
@@ -53,12 +53,14 @@ local: ## Build the image locally.
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	docker inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
-setup-multi: ##setup docker multiplatform
+setup-multi: ## setup docker multiplatform
 	docker buildx create --name buildx-multi-arch ; docker buildx use buildx-multi-arch
 
-docker-multi: ## Build multiplatform
+docker-multi: ## Multi-platform build.
+	$(call setup-multi)
+	$(call run_hadolint)
 	mkdir -vp  source/logs/ ; \
-	docker buildx build --no-cache --platform linux/amd64,linux/arm64/v8 . \
+	docker buildx build --platform linux/amd64,linux/arm64/v8 . \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) \
