@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 7.4.0
+CALIBRE_VERSION ?= 7.5.1
 DOCKER_REPO ?= localhost
 EXPOSED_PORT ?= 8321
 
@@ -9,9 +9,9 @@ EXPOSED_PORT ?= 8321
 LOGDATE := $(shell date +%F-%H%M)
 
 # pull the name from the docker file - these labels *MUST* be set
-CONTAINER_PROJECT ?= $(shell grep LABEL Dockerfile | grep -i project | cut -d = -f2 | tr -d '"')
-CONTAINER_NAME ?= $(shell grep LABEL Dockerfile | grep -i name | cut -d = -f2 | tr -d '"')
-CONTAINER_TAG ?= $(shell grep LABEL Dockerfile | grep -i version | cut -d = -f2| tr -d '"')
+CONTAINER_PROJECT ?= $(shell grep org.opencontainers.image.vendor Dockerfile | cut -d = -f2 |  tr -d '"\\ ')
+CONTAINER_NAME ?= $(shell grep org.opencontainers.image.ref.name Dockerfile  | cut -d = -f2 |  tr -d '"\\ ')
+CONTAINER_TAG ?= $(shell grep org.opencontainers.image.version Dockerfile    | cut -d = -f2 |  tr -d '"\\ ')
 CONTAINER_STRING ?= $(CONTAINER_PROJECT)/$(CONTAINER_NAME):$(CONTAINER_TAG)
 
 C_ID = $(shell ${GET_ID})
@@ -53,20 +53,20 @@ docker: ## Build the docker image locally.
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	docker inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
-docker-multi: ## Build multiplatform
-	$(call run_hadolint)
-	git pull --recurse-submodules; \
-	mkdir -vp  source/logs/ ; \
-	docker buildx build --no-cache --platform linux/amd64,linux/arm64/v8 . \
-		-t $(CONTAINER_STRING) \
-		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-		--label BUILDDATE=$(shell date +%F-%H%M) \
-		--progress plain \
-		--push 2>&1 \
-	| tee source/logs/build-multi-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
-
 setup-multi: ## setup docker multiplatform
 	docker buildx create --name buildx-multi-arch ; docker buildx use buildx-multi-arch
+
+docker-multi: ## Multi-platform build.
+	$(call setup-multi)
+	$(call run_hadolint)
+	mkdir -vp  source/logs/ ; \
+	docker buildx build --platform linux/amd64,linux/arm64/v8 . \
+		-t $(CONTAINER_STRING) \
+		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
+		--label org.opencontainers.image.created=$(shell date +%F-%H%M) \
+		--cache-from $(CONTAINER_STRING) \
+		--progress plain \
+		--push
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
@@ -80,6 +80,7 @@ apptainer: ## Build an apptainer sif image directly
 run: ## run the image
 	[ "${C_IMAGES}" ] || \
 		make local
+	[ "${C_ID}" ] || \
 	docker run \
           --rm \
           -it \
