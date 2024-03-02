@@ -57,7 +57,7 @@ setup-multi: ## setup docker multiplatform
 	docker buildx create --name buildx-multi-arch ; docker buildx use buildx-multi-arch
 
 docker-multi: ## Multi-platform build.
-	$(call setup-multi)
+	make setup-multi
 	$(call run_hadolint)
 	mkdir -vp  source/logs/ ; \
 	docker buildx build --platform linux/amd64,linux/arm64/v8 . \
