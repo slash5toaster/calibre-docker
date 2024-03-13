@@ -56,7 +56,7 @@ RUN mkdir -vp /usr/share/desktop-directories/
 
 # set the locale to en_US.UTF-8
 RUN locale-gen && \
-     /usr/sbin/update-locale LC_ALL=C.utf8
+    /usr/sbin/update-locale LC_ALL=C.utf8
 
 WORKDIR /tmp/build/
 RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
