@@ -3,22 +3,21 @@ From: debian:unstable-slim
 Stage: spython-base
 
 %arguments
-   CALIBRE_VERSION=7.5.1
+   CALIBRE_VERSION=7.6.0
 
 %files
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 
 %labels
-   project=slash5toaster
+   org.opencontainers.image.vendor=slash5toaster
    org.opencontainers.image.authors="slash5toaster@gmail.com"
-   name=calibre
-   version={{ CALIBRE_VERSION }}
+   org.opencontainers.image.ref.name=calibre
+   org.opencontainers.image.version={{ CALIBRE_VERSION }}
 
 %post
     apt-get update \
  && apt-get install -y \
         ca-certificates \
-        mailcap \
         libegl1 \
         libfontconfig1 \
         libglx0 \
@@ -47,8 +46,6 @@ Stage: spython-base
         libxrandr-dev \
         libxrender1 \
         libxtst6 \
-        xpdf \
-        xpdf-utils \
         xdg-desktop-portal-dev \
         xdg-desktop-portal-xapp \
         xdg-utils \
@@ -67,7 +64,6 @@ Stage: spython-base
 
     wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }}
 
-    xdg-mime default xpdf.desktop application/pdf
 
 %test
    type calibre || exit 1

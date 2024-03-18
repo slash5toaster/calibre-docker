@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 7.5.1
+CALIBRE_VERSION ?= 7.6.0
 DOCKER_REPO ?= localhost
 EXPOSED_PORT ?= 8321
 
@@ -57,7 +57,7 @@ setup-multi: ## setup docker multiplatform
 	docker buildx create --name buildx-multi-arch ; docker buildx use buildx-multi-arch
 
 docker-multi: ## Multi-platform build.
-	$(call setup-multi)
+	make setup-multi
 	$(call run_hadolint)
 	mkdir -vp  source/logs/ ; \
 	docker buildx build --platform linux/amd64,linux/arm64/v8 . \

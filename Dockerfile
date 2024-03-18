@@ -56,7 +56,7 @@ RUN mkdir -vp /usr/share/desktop-directories/
 
 # set the locale to en_US.UTF-8
 RUN locale-gen && \
-     /usr/sbin/update-locale LC_ALL=C.utf8
+    /usr/sbin/update-locale LC_ALL=C.utf8
 
 WORKDIR /tmp/build/
 RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
@@ -73,6 +73,6 @@ WORKDIR /opt/Books
 LABEL org.opencontainers.image.vendor=slash5toaster \
       org.opencontainers.image.authors="slash5toaster@gmail.com" \
       org.opencontainers.image.ref.name=calibre \
-      org.opencontainers.image.version=7.5.1
+      org.opencontainers.image.version=7.6.0
 
 #### End of File, if this is missing the file has been truncated
