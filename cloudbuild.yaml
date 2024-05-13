@@ -30,35 +30,35 @@
 # $REF_NAME: the name of your branch or tag
 
 # [START cloudbuild_basic_config]
-steps:
-  - name: 'gcr.io/cloud-builders/git'
-    args: ['submodule', 'update', '--recursive', '--remote']
+# steps:
+#   - name: 'gcr.io/cloud-builders/git'
+#     args: ['submodule', 'update', '--recursive', '--remote']
 
-  # Docker Build
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        git checkout --recurse-submodules $TAG_NAME || git checkout --recurse-submodules $COMMIT_SHA ;\
-        make local
-    env:
-      - 'DOCKER_BUILDKIT=1'
+#   # Docker Build
+#   - name: 'gcr.io/cloud-builders/docker'
+#     entrypoint: "bash"
+#     args:
+#       - "-c"
+#       - |
+#         git checkout --recurse-submodules $TAG_NAME || git checkout --recurse-submodules $COMMIT_SHA ;\
+#         make local
+#     env:
+#       - 'DOCKER_BUILDKIT=1'
 
-  # Docker Push
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push',
-           'us-central1-docker.pkg.dev/${PROJECT_ID}/slash5toaster/calibre']
+#   # Docker Push
+#   - name: 'gcr.io/cloud-builders/docker'
+#     args: ['push',
+#            'us-central1-docker.pkg.dev/${PROJECT_ID}/slash5toaster/calibre']
 
-  # Entrypoint, timeout and environment variables
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'gcloud'
-    timeout: 240s
-    args: ['compute', 'instances',
-           'create-with-container', 'calibre-docker',
-           '--container-image',
-           'us-central1-docker.pkg.dev/${PROJECT_ID}/slash5toaster/calibre']
-    env:
-      - 'CLOUDSDK_COMPUTE_REGION=us-central1'
-      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
+#   # Entrypoint, timeout and environment variables
+#   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#     entrypoint: 'gcloud'
+#     timeout: 240s
+#     args: ['compute', 'instances',
+#            'create-with-container', 'calibre-docker',
+#            '--container-image',
+#            'us-central1-docker.pkg.dev/${PROJECT_ID}/slash5toaster/calibre']
+#     env:
+#       - 'CLOUDSDK_COMPUTE_REGION=us-central1'
+#       - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
 # [END cloudbuild_basic_config]
