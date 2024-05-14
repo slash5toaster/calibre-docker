@@ -49,7 +49,7 @@ docker: ## Build the docker image locally.
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--cache-from $(CONTAINER_STRING) \
 		--progress plain \
-		--label BUILDDATE=$(LOGDATE) 2>&1 \
+		--label org.opencontainers.image.created=$(shell date +%F-%H%M) 2>&1 \
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	docker inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
@@ -66,7 +66,8 @@ docker-multi: ## Multi-platform build.
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) \
 		--cache-from $(CONTAINER_STRING) \
 		--progress plain \
-		--push
+		--push 2>&1 \
+	| tee source/logs/buildmulti-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
