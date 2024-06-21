@@ -31,6 +31,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         wget \
         xz-utils \
  && apt-get install -y --no-install-recommends \
+        epiphany \
         fonts-noto-cjk \
         libnss3-dev \
         libxcomposite-dev \
