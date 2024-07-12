@@ -31,6 +31,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         wget \
         xz-utils \
  && apt-get install -y --no-install-recommends \
+        epiphany \
         fonts-noto-cjk \
         libnss3-dev \
         libxcomposite-dev \
@@ -73,6 +74,6 @@ WORKDIR /opt/Books
 LABEL org.opencontainers.image.vendor=slash5toaster \
       org.opencontainers.image.authors="slash5toaster@gmail.com" \
       org.opencontainers.image.ref.name=calibre \
-      org.opencontainers.image.version=7.10.0
+      org.opencontainers.image.version=7.12.0
 
 #### End of File, if this is missing the file has been truncated
