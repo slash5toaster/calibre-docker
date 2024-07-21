@@ -96,7 +96,7 @@ run: ## run the image
 
 publish: ## Push server image to remote
 	[ "${C_IMAGES}" ] || \
-		make local
+		make docker
 	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'
 	docker push $(CONTAINER_STRING)
 
