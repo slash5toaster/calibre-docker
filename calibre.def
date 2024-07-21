@@ -37,7 +37,7 @@ Stage: spython-base
         wget \
         xz-utils \
  && apt-get install -y --no-install-recommends \
-        epiphany \
+        dillo \
         fonts-noto-cjk \
         libnss3-dev \
         libxcomposite-dev \
@@ -56,10 +56,12 @@ Stage: spython-base
         xfonts-intl-european \
         xfonts-intl-japanese \
         xfonts-intl-phonetic \
+        xpdf \
  && apt-get autoclean \
  && apt-get clean
-
     mkdir -vp /usr/share/desktop-directories/
+    # register for pdf
+    xdg-mime default xpdf.desktop application/pdf
     locale-gen
     /usr/sbin/update-locale LC_ALL=C.utf8
 

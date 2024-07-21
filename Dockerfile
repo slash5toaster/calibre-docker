@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         wget \
         xz-utils \
  && apt-get install -y --no-install-recommends \
-        epiphany \
+        dillo \
         fonts-noto-cjk \
         libnss3-dev \
         libxcomposite-dev \
@@ -50,10 +50,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xfonts-intl-european \
         xfonts-intl-japanese \
         xfonts-intl-phonetic \
+        xpdf \
  && apt-get autoclean \
  && apt-get clean
  
 RUN mkdir -vp /usr/share/desktop-directories/
+    # register for pdf
+RUN xdg-mime default xpdf.desktop application/pdf
 
 # set the locale to en_US.UTF-8
 RUN locale-gen && \
