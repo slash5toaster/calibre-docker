@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 7.13.0
+CALIBRE_VERSION ?= 7.14.0
 
 DOCKER_REPO ?= localhost
 EXPOSED_PORT ?= 8321
@@ -96,7 +96,7 @@ run: ## run the image
 
 publish: ## Push server image to remote
 	[ "${C_IMAGES}" ] || \
-		make local
+		make docker
 	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'
 	docker push $(CONTAINER_STRING)
 

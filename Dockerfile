@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         wget \
         xz-utils \
  && apt-get install -y --no-install-recommends \
-        epiphany \
+        dillo \
         fonts-noto-cjk \
         libnss3-dev \
         libxcomposite-dev \
@@ -50,10 +50,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xfonts-intl-european \
         xfonts-intl-japanese \
         xfonts-intl-phonetic \
+        xpdf \
  && apt-get autoclean \
  && apt-get clean
  
 RUN mkdir -vp /usr/share/desktop-directories/
+    # register for pdf
+RUN xdg-mime default xpdf.desktop application/pdf
 
 # set the locale to en_US.UTF-8
 RUN locale-gen && \
@@ -74,6 +77,6 @@ WORKDIR /opt/Books
 LABEL org.opencontainers.image.vendor=slash5toaster \
       org.opencontainers.image.authors="slash5toaster@gmail.com" \
       org.opencontainers.image.ref.name=calibre \
-      org.opencontainers.image.version=7.13.0
+      org.opencontainers.image.version=7.14.0
 
 #### End of File, if this is missing the file has been truncated
