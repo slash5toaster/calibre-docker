@@ -33,6 +33,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
  && apt-get install -y --no-install-recommends \
         dillo \
         fonts-noto-cjk \
+        kde-cli-tools \
         libnss3-dev \
         libxcomposite-dev \
         libxdamage-dev \
