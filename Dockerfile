@@ -33,6 +33,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
  && apt-get install -y --no-install-recommends \
         dillo \
         fonts-noto-cjk \
+        kde-cli-tools \
         libnss3-dev \
         libxcomposite-dev \
         libxdamage-dev \
@@ -75,8 +76,8 @@ WORKDIR /opt/Books
 
 # Mandatory Labels
 LABEL org.opencontainers.image.vendor=slash5toaster \
-      org.opencontainers.image.authors="slash5toaster@gmail.com" \
+      org.opencontainers.image.authors=slash5toaster@gmail.com \
       org.opencontainers.image.ref.name=calibre \
-      org.opencontainers.image.version=7.16.0
+      org.opencontainers.image.version=7.17.0
 
 #### End of File, if this is missing the file has been truncated
