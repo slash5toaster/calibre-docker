@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 7.17.0
+CALIBRE_VERSION ?= 7.18.0
 
 DOCKER_REPO ?= localhost
 EXPOSED_PORT ?= 8321
@@ -58,7 +58,7 @@ setup-multi: ## setup docker multiplatform
 	docker buildx create --name buildx-multi-arch ; docker buildx use buildx-multi-arch
 
 docker-multi: ## Multi-platform build.
-	make setup-multi
+	$(call setup-multi)
 	$(call run_hadolint)
 	mkdir -vp  source/logs/ ; \
 	docker buildx build --platform linux/amd64,linux/arm64/v8 . \
@@ -81,7 +81,7 @@ apptainer: ## Build an apptainer sif image directly
 
 run: ## run the image
 	[ "${C_IMAGES}" ] || \
-		make local
+		make docker
 	[ "${C_ID}" ] || \
 	docker run \
           --rm \
