@@ -56,7 +56,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
  && apt-get clean
  
 RUN mkdir -vp /usr/share/desktop-directories/
-    # register for pdf
+# register for pdf
 RUN xdg-mime default xpdf.desktop application/pdf
 
 # set the locale to en_US.UTF-8
