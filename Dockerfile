@@ -54,10 +54,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xpdf \
  && apt-get autoclean \
  && apt-get clean
- 
+
 RUN mkdir -vp /usr/share/desktop-directories/
 # register for pdf
-RUN xdg-mime default xpdf.desktop application/pdf
+RUN xdg-mime default calibre-ebook-viewer.desktop application/pdf
 
 # set the locale to en_US.UTF-8
 RUN locale-gen && \
