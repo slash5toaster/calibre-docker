@@ -54,10 +54,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xpdf \
  && apt-get autoclean \
  && apt-get clean
- 
+
 RUN mkdir -vp /usr/share/desktop-directories/
 # register for pdf
-RUN xdg-mime default xpdf.desktop application/pdf
+RUN xdg-mime default calibre-ebook-viewer.desktop application/pdf
 
 # set the locale to en_US.UTF-8
 RUN locale-gen && \
@@ -78,6 +78,6 @@ WORKDIR /opt/Books
 LABEL org.opencontainers.image.vendor=slash5toaster \
       org.opencontainers.image.authors=slash5toaster@gmail.com \
       org.opencontainers.image.ref.name=calibre \
-      org.opencontainers.image.version=8.6.0
+      org.opencontainers.image.version=8.7.0
 
 #### End of File, if this is missing the file has been truncated
