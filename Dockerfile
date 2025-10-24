@@ -67,6 +67,8 @@ WORKDIR /tmp/build/
 RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
      wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
 
+# test that calibre got installed properly
+RUN type calibre || exit
 COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 
 WORKDIR /opt/Books
