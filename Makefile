@@ -60,6 +60,7 @@ setup-multi: ## setup docker multiplatform
 docker-multi: ## Multi-platform build.
 	$(call setup-multi)
 	$(call run_hadolint)
+	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
 	docker buildx build --platform linux/amd64,linux/arm64/v8 . \
 		-t $(CONTAINER_STRING) \
