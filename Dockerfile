@@ -1,11 +1,12 @@
-FROM debian:unstable-slim
+FROM debian:unstable-slim AS base-build
 
 ARG CALIBRE_VERSION
 
 # Otherwize you will get an interactive setup session
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -55,6 +56,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
  && apt-get autoclean \
  && apt-get clean
 
+FROM base-build
 RUN mkdir -vp /usr/share/desktop-directories/
 # register for pdf
 RUN xdg-mime default calibre-ebook-viewer.desktop application/pdf
@@ -68,7 +70,9 @@ RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
      wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
 
 # test that calibre got installed properly
-RUN type calibre || exit
+RUN type calibre || exit 1 \
+ && calibre --version
+
 COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 
 WORKDIR /opt/Books
@@ -80,6 +84,6 @@ WORKDIR /opt/Books
 LABEL org.opencontainers.image.vendor=slash5toaster \
       org.opencontainers.image.authors=slash5toaster@gmail.com \
       org.opencontainers.image.ref.name=calibre \
-      org.opencontainers.image.version=8.11.1
+      org.opencontainers.image.version=8.12.0
 
 #### End of File, if this is missing the file has been truncated
