@@ -66,8 +66,8 @@ Stage: spython-base
     locale-gen
     /usr/sbin/update-locale LC_ALL=C.utf8
 
-    wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }}
-
+    wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }} \
+    || exit 2
 
 %test
    type calibre || exit 1
