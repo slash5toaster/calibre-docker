@@ -67,7 +67,8 @@ RUN locale-gen && \
 
 WORKDIR /tmp/build/
 RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
-     wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
+     wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION} \
+     || exit 1
 
 # test that calibre got installed properly
 RUN type calibre || exit 1 \
@@ -84,6 +85,6 @@ WORKDIR /opt/Books
 LABEL org.opencontainers.image.vendor=slash5toaster \
       org.opencontainers.image.authors=slash5toaster@gmail.com \
       org.opencontainers.image.ref.name=calibre \
-      org.opencontainers.image.version=8.13.0
+      org.opencontainers.image.version=8.14.0
 
 #### End of File, if this is missing the file has been truncated
