@@ -5,7 +5,7 @@ CALIBRE_VERSION ?= 8.15.0
 
 DOCKER_REPO ?= localhost
 EXPOSED_PORT ?= 8321
-
+DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || exit)
 # Date for log files
 LOGDATE := $(shell date +%F-%H%M)
 
@@ -22,7 +22,7 @@ C_IMAGES = $(shell ${GET_IMAGES})
 define run_hadolint
 	@echo ''
 	@echo '> Dockerfile$(1) ==========='
-	docker run --rm -i \
+	$(DOCKER_BIN) run --rm -i \
 	-e HADOLINT_FAILURE_THRESHOLD=error \
 	-e HADOLINT_IGNORE=DL3042,DL3008,DL3015,DL3048 \
 	hadolint/hadolint < Dockerfile$(1)
@@ -45,24 +45,24 @@ docker: ## Build the docker image locally.
 	git pull --recurse-submodules;\
 	mkdir -vp source/logs/ ; \
 	DOCKER_BUILDKIT=1 \
-	docker build . \
+	$(DOCKER_BIN) build . \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--cache-from $(CONTAINER_STRING) \
 		--progress plain \
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) 2>&1 \
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
-	docker inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
+	$(DOCKER_BIN) inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
 setup-multi: ## setup docker multiplatform
-	docker buildx create --name buildx-multi-arch ; docker buildx use buildx-multi-arch
+	$(DOCKER_BIN) buildx create --name buildx-multi-arch ; $(DOCKER_BIN) buildx use buildx-multi-arch
 
 docker-multi: ## Multi-platform build.
 	$(call setup-multi)
 	$(call run_hadolint)
 	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
-	docker buildx build --platform linux/amd64,linux/arm64/v8 . \
+	$(DOCKER_BIN) buildx build --platform linux/amd64,linux/arm64/v8 . \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) \
@@ -73,7 +73,7 @@ docker-multi: ## Multi-platform build.
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
-         docker rmi $(CONTAINER_STRING)
+         $(DOCKER_BIN) rmi $(CONTAINER_STRING)
 
 apptainer: ## Build an apptainer sif image directly
 	apptainer build \
@@ -84,7 +84,7 @@ run: ## run the image
 	[ "${C_IMAGES}" ] || \
 		make docker
 	[ "${C_ID}" ] || \
-	docker run \
+	$(DOCKER_BIN) run \
           --rm \
           -it \
           -e TZ=PST8PDT \
@@ -99,13 +99,13 @@ publish: ## Push server image to remote
 	[ "${C_IMAGES}" ] || \
 		make docker
 	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'
-	docker push $(CONTAINER_STRING)
+	$(DOCKER_BIN) push $(CONTAINER_STRING)
 
 docker-lint: ## Check files for errors
 	$(call run_hadolint)
 
 # Commands for extracting information on the running container
-GET_IMAGES := docker images ${CONTAINER_STRING} --format "{{.ID}}"
-GET_CONTAINER := docker ps -a --filter "name=${CONTAINER_NAME}" --no-trunc
+GET_IMAGES := $(DOCKER_BIN) images ${CONTAINER_STRING} --format "{{.ID}}"
+GET_CONTAINER := $(DOCKER_BIN) ps -a --filter "name=${CONTAINER_NAME}" --no-trunc
 GET_ID := ${GET_CONTAINER} --format {{.ID}}
 GET_STATUS := ${GET_CONTAINER} --format {{.Status}} | cut -d " " -f1
