@@ -58,8 +58,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 FROM base-build
 RUN mkdir -vp /usr/share/desktop-directories/
-# register for pdf
-RUN xdg-mime default calibre-ebook-viewer.desktop application/pdf
 
 # set the locale to en_US.UTF-8
 RUN locale-gen && \
@@ -69,6 +67,9 @@ WORKDIR /tmp/build/
 RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
      wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION} \
      || exit 1
+
+# register for pdf
+RUN xdg-mime default calibre-ebook-viewer.desktop application/pdf
 
 # test that calibre got installed properly
 RUN type calibre || exit 1 \
