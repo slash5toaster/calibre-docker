@@ -64,7 +64,7 @@ Stage: spython-base
     locale-gen
     /usr/sbin/update-locale LC_ALL=C.utf8
 
-    wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }} \
+    wget -c -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }} \
     || exit 2
 
     # register for pdf
