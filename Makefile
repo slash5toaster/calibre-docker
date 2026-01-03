@@ -1,9 +1,9 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 8.15.0
+CALIBRE_VERSION ?= 8.16.2
 
-DOCKER_REPO ?= localhost
+DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
 DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || exit)
 # Date for log files
@@ -62,13 +62,12 @@ docker-multi: ## Multi-platform build.
 	$(call run_hadolint)
 	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
-	$(DOCKER_BIN) buildx build --platform linux/amd64,linux/arm64/v8 . \
+	$(DOCKER_BIN) build --platform linux/amd64,linux/arm64/v8 . \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) \
 		--cache-from $(CONTAINER_STRING) \
-		--progress plain \
-		--push 2>&1 \
+		--progress plain 2>&1 \
 	| tee source/logs/buildmulti-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
 destroy: ## obliterate the local image

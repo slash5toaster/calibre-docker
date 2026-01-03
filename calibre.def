@@ -3,7 +3,7 @@ From: debian:unstable-slim
 Stage: spython-base
 
 %arguments
-   CALIBRE_VERSION=8.15.0
+   CALIBRE_VERSION=8.16.2
 
 %files
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
@@ -61,13 +61,14 @@ Stage: spython-base
  && apt-get autoclean \
  && apt-get clean
     mkdir -vp /usr/share/desktop-directories/
-    # register for pdf
-    xdg-mime default calibre-ebook-viewer.desktop application/pdf
     locale-gen
     /usr/sbin/update-locale LC_ALL=C.utf8
 
-    wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }} \
+    wget -c -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }} \
     || exit 2
+
+    # register for pdf
+    xdg-mime default calibre-ebook-viewer.desktop application/pdf
 
 %test
    type calibre || exit 1
