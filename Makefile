@@ -6,6 +6,7 @@ CALIBRE_VERSION ?= 8.16.2
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
 DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || exit)
+APPTAINER_BIN := $(shell type -p apptainer || type -p apptainer.lima || type -p singularity || exit)
 # Date for log files
 LOGDATE := $(shell date +%F-%H%M)
 
@@ -39,6 +40,14 @@ help: ## This help.
 
 envs: ## show the environments
 	$(shell echo -e "${CONTAINER_STRING}\n\t${CONTAINER_PROJECT}\n\t${CONTAINER_NAME}\n\t${CONTAINER_TAG}")
+
+sif: ## Build a sif image directly
+	mkdir -vp  source/logs/ ; \
+	$(APPTAINER_BIN) build \
+            --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
+            -F /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif \
+            calibre.def \
+	| tee source/logs/sif-build-$(shell date +%F-%H%M).log
 
 docker: ## Build the docker image locally.
 	$(call run_hadolint)
@@ -74,11 +83,6 @@ destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          $(DOCKER_BIN) rmi $(CONTAINER_STRING)
 
-apptainer: ## Build an apptainer sif image directly
-	apptainer build \
-            --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-            /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif calibre.def
-
 run: ## run the image
 	[ "${C_IMAGES}" ] || \
 		make docker
@@ -93,6 +97,10 @@ run: ## run the image
           --hostname=$(CONTAINER_NAME) \
           --publish $(EXPOSED_PORT):$(EXPOSED_PORT) \
           $(CONTAINER_STRING)
+
+pull: ## Pull Docker image
+	@echo 'pulling $(CONTAINER_STRING)'
+	$(DOCKER_BIN) pull $(CONTAINER_STRING)
 
 publish: ## Push server image to remote
 	[ "${C_IMAGES}" ] || \
