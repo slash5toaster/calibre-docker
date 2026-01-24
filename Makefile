@@ -29,6 +29,17 @@ define run_hadolint
 	hadolint/hadolint < Dockerfile$(1)
 endef
 
+# Define a different build call for docker
+#
+ifeq ($(shell basename $(DOCKER_BIN)), docker)
+    # Commands/definitions if true (no tab at the start of these lines)
+    BUILD_CMD = buildx build
+else
+    # Commands/definitions if false
+    BUILD_CMD = build
+endif
+
+
 # HELP
 # https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 .PHONY: help
@@ -38,9 +49,16 @@ help: ## This help.
 
 .DEFAULT_GOAL := help
 
+# just show the details
+#
 envs: ## show the environments
-	$(shell echo -e "${CONTAINER_STRING}\n\t${CONTAINER_PROJECT}\n\t${CONTAINER_NAME}\n\t${CONTAINER_TAG}")
+	$(info Container String - ${CONTAINER_STRING})
+	$(info Project          - ${CONTAINER_PROJECT})
+	$(info Name             - ${CONTAINER_NAME})
+	$(info Tag is           - ${CONTAINER_TAG})
 
+# Build apptainer/singularity
+#
 sif: ## Build a sif image directly
 	mkdir -vp  source/logs/ ; \
 	$(APPTAINER_BIN) build \
@@ -49,12 +67,14 @@ sif: ## Build a sif image directly
             calibre.def \
 	| tee source/logs/sif-build-$(shell date +%F-%H%M).log
 
+# Build docker/OCI container locally
+#
 docker: ## Build the docker image locally.
 	$(call run_hadolint)
 	git pull --recurse-submodules;\
 	mkdir -vp source/logs/ ; \
 	DOCKER_BUILDKIT=1 \
-	$(DOCKER_BIN) build . \
+	$(DOCKER_BIN) $(BUILD_CMD) \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--cache-from $(CONTAINER_STRING) \
@@ -63,27 +83,29 @@ docker: ## Build the docker image locally.
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	$(DOCKER_BIN) inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
-setup-multi: ## setup docker multiplatform
-	$(DOCKER_BIN) buildx create --name buildx-multi-arch ; $(DOCKER_BIN) buildx use buildx-multi-arch
+# setup-multi: ## setup docker multiplatform
+# 	$(DOCKER_BIN) buildx create --name buildx-multi-arch ; $(DOCKER_BIN) buildx use buildx-multi-arch
 
 docker-multi: ## Multi-platform build.
 	$(call setup-multi)
 	$(call run_hadolint)
 	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
-	$(DOCKER_BIN) build --platform linux/amd64,linux/arm64/v8 . \
+	$(DOCKER_BIN) $(BUILD_CMD) \
+		--platform linux/amd64,linux/arm64/v8 \
+		--cache-from $(CONTAINER_STRING) \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) \
-		--cache-from $(CONTAINER_STRING) \
+		-f Dockerfile . \
 		--progress plain 2>&1 \
-	| tee source/logs/buildmulti-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
+	| tee source/logs/build-multi-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          $(DOCKER_BIN) rmi $(CONTAINER_STRING)
 
-run: ## run the image
+run: ## launch shell into the container, with this directory mounted to /opt/devel/
 	[ "${C_IMAGES}" ] || \
 		make docker
 	[ "${C_ID}" ] || \
@@ -106,7 +128,7 @@ publish: ## Push server image to remote
 	[ "${C_IMAGES}" ] || \
 		make docker
 	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'
-	$(DOCKER_BIN) push $(CONTAINER_STRING)
+	$(DOCKER_BIN) push --all-platforms $(CONTAINER_STRING)
 
 docker-lint: ## Check files for errors
 	$(call run_hadolint)
