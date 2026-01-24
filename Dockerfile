@@ -1,8 +1,8 @@
-FROM debian:unstable-slim AS base-build
+FROM --platform=$BUILDPLATFORM debian:unstable-slim AS base-build
 
 ARG CALIBRE_VERSION
 
-# Otherwize you will get an interactive setup session
+# Otherwise you will get an interactive setup session
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; \
