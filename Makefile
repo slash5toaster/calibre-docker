@@ -7,6 +7,10 @@ DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
 DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || exit)
 APPTAINER_BIN := $(shell type -p apptainer || type -p apptainer.lima || type -p singularity || exit)
+
+# info for pushing latest tag when on main branch
+GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+
 # Date for log files
 LOGDATE := $(shell date +%F-%H%M)
 
@@ -125,11 +129,20 @@ pull: ## Pull Docker image
 	@echo 'pulling $(CONTAINER_STRING)'
 	$(DOCKER_BIN) pull $(CONTAINER_STRING)
 
-publish: ## Push server image to remote
+publish: ## Push server image to remote, if on main, publish latest tag
 	[ "${C_IMAGES}" ] || \
 		make docker
-	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'
-	$(DOCKER_BIN) push --all-platforms $(CONTAINER_STRING)
+	$(info 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)')
+	$(info $(DOCKER_BIN) push --all-platforms $(CONTAINER_STRING))
+
+# 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+		$(DOCKER_BIN) push $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	else \
+		echo "Not on main branch (current: $(GIT_BRANCH)). Skipping 'latest' update."; \
+	fi
 
 docker-lint: ## Check files for errors
 	$(call run_hadolint)
