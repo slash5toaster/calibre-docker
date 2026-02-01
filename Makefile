@@ -140,8 +140,6 @@ publish: ## Push server image to remote, if on main, publish latest tag
 		echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 		$(DOCKER_BIN) push $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
-	else \
-		echo "Not on main branch (current: $(GIT_BRANCH)). Skipping 'latest' update."; \
 	fi
 
 docker-lint: ## Check files for errors
