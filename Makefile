@@ -128,6 +128,11 @@ run: ## launch shell into the container, with this directory mounted to /opt/dev
 pull: ## Pull Docker image
 	@echo 'pulling $(CONTAINER_STRING)'
 	$(DOCKER_BIN) pull $(CONTAINER_STRING)
+# 	also latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		$(DOCKER_BIN) pull $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
+
 
 publish: ## Push server image to remote, if on main, publish latest tag
 	[ "${C_IMAGES}" ] || \
