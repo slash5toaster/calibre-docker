@@ -1,12 +1,16 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 8.16.2
+CALIBRE_VERSION ?= 9.1.0
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
 DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || exit)
 APPTAINER_BIN := $(shell type -p apptainer || type -p apptainer.lima || type -p singularity || exit)
+
+# info for pushing latest tag when on main branch
+GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+
 # Date for log files
 LOGDATE := $(shell date +%F-%H%M)
 
@@ -80,6 +84,7 @@ docker: ## Build the docker image locally.
 		--cache-from $(CONTAINER_STRING) \
 		--progress plain \
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) 2>&1 \
+		-f Dockerfile . \
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	$(DOCKER_BIN) inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
@@ -92,7 +97,7 @@ docker-multi: ## Multi-platform build.
 	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
 	$(DOCKER_BIN) $(BUILD_CMD) \
-		--platform linux/amd64,linux/arm64/v8 \
+        --platform linux/amd64,linux/arm64/v8 \
 		--cache-from $(CONTAINER_STRING) \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
@@ -123,12 +128,24 @@ run: ## launch shell into the container, with this directory mounted to /opt/dev
 pull: ## Pull Docker image
 	@echo 'pulling $(CONTAINER_STRING)'
 	$(DOCKER_BIN) pull $(CONTAINER_STRING)
+# 	also latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		$(DOCKER_BIN) pull $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
-publish: ## Push server image to remote
+
+publish: ## Push server image to remote, if on main, publish latest tag
 	[ "${C_IMAGES}" ] || \
 		make docker
-	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'
+	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'; \
 	$(DOCKER_BIN) push --all-platforms $(CONTAINER_STRING)
+
+# 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+		$(DOCKER_BIN) push $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
 docker-lint: ## Check files for errors
 	$(call run_hadolint)
