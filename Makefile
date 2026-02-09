@@ -109,6 +109,11 @@ docker-multi: ## Multi-platform build.
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          $(DOCKER_BIN) rmi $(CONTAINER_STRING)
+# 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
 run: ## launch shell into the container, with this directory mounted to /opt/devel/
 	[ "${C_IMAGES}" ] || \
