@@ -97,7 +97,7 @@ docker-multi: ## Multi-platform build.
 	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
 	$(DOCKER_BIN) $(BUILD_CMD) \
-        --platform linux/amd64,linux/arm64/v8 \
+		--platform linux/amd64,linux/arm64/v8 \
 		--cache-from $(CONTAINER_STRING) \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
