@@ -30,7 +30,7 @@ Assuming your library is at `/opt/Books`
   Open the gui with:
 
 ```bash
-apptainer run --cpus 4 \
+apptainer run \
   --bind /opt/Books/ \
   docker://slash5toaster/calibre:latest calibre
 ```
@@ -67,3 +67,5 @@ To run the server:
          slash5toaster/calibre:latest \
          calibre-server --port=8124 /opt/Books/
  ```
+
+ There is an included docker compose template to run the server

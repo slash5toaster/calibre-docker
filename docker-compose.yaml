@@ -4,7 +4,6 @@ services:
     container_name: calibre-server
     # Optional - specify the uid and gid you would like to use instead of root
     # user: uid:gid
-    network_mode: "host"
     ports:
       - 18080:18080/tcp
     volumes:
