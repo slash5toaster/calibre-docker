@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 9.1.0
+CALIBRE_VERSION ?= 9.2.1
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
@@ -97,7 +97,7 @@ docker-multi: ## Multi-platform build.
 	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
 	$(DOCKER_BIN) $(BUILD_CMD) \
-        --platform linux/amd64,linux/arm64/v8 \
+		--platform linux/amd64,linux/arm64/v8 \
 		--cache-from $(CONTAINER_STRING) \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
@@ -109,6 +109,11 @@ docker-multi: ## Multi-platform build.
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          $(DOCKER_BIN) rmi $(CONTAINER_STRING)
+# 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
 run: ## launch shell into the container, with this directory mounted to /opt/devel/
 	[ "${C_IMAGES}" ] || \
@@ -144,7 +149,7 @@ publish: ## Push server image to remote, if on main, publish latest tag
 	@if [ "$(GIT_BRANCH)" = "main" ]; then \
 		echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
-		$(DOCKER_BIN) push $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+		$(DOCKER_BIN) push --all-platforms $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 	fi
 
 docker-lint: ## Check files for errors

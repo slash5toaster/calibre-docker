@@ -1,0 +1,14 @@
+services:
+  calibre-server:
+    image: slash5toaster/calibre:latest
+    container_name: calibre-server
+    # Optional - specify the uid and gid you would like to use instead of root
+    # user: uid:gid
+    ports:
+      - 18080:18080/tcp
+    volumes:
+      - type: bind
+        source: /opt/Books/
+        target: /opt/Books/
+    entrypoint: ["calibre-server", "--port", "18080", "/opt/Books/"]
+    restart: 'unless-stopped'
