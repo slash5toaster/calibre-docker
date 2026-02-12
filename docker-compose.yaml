@@ -8,7 +8,7 @@ services:
       - 18080:18080/tcp
     volumes:
       - type: bind
-        source: /opt/Books/
-        target: /opt/Books/
-    entrypoint: ["calibre-server", "--port", "18080", "/opt/Books/"]
+        source: "~/Calibre\ Library/"
+        target: "~/Calibre\ Library/"
+    entrypoint: ["calibre-server", "--port", "18080", "~/Calibre\ Library/"]
     restart: 'unless-stopped'
