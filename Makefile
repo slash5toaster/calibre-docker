@@ -138,7 +138,6 @@ pull: ## Pull Docker image
 		$(DOCKER_BIN) pull $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 	fi
 
-
 publish: ## Push server image to remote, if on main, publish latest tag
 	[ "${C_IMAGES}" ] || \
 		make docker

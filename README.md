@@ -58,7 +58,7 @@ nerdctl run --rm -it \
         calibre --with-library="~/Calibre Library/"
 ```
 
-To run the server:  
+To run the server:
 
 ```bash
  nerdctl run --rm -it \
