@@ -1,12 +1,6 @@
-FROM --platform=$BUILDPLATFORM debian:unstable-slim AS base-build
+FROM --platform=$BUILDPLATFORM alpine:3.23 AS base-build
 
 ARG CALIBRE_VERSION
-
-# Otherwise you will get an interactive setup session
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; \
-    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
