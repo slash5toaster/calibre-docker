@@ -2,60 +2,29 @@ FROM --platform=$BUILDPLATFORM alpine:3.23 AS base-build
 
 ARG CALIBRE_VERSION
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update \
- && apt-get install -y \
+RUN --mount=type=cache,target=/etc/apk/cache,sharing=locked \
+    --mount=type=cache,target=/var/cache/apk,sharing=locked \
+    apk update \
+ && apk add \
         ca-certificates \
-        libegl1 \
-        libfontconfig1 \
-        libglx0 \
-        libopengl0 \
-        libxcb-cursor0 \
-        libxcb-icccm4 \
-        libxcb-image0 \
-        libxcb-keysyms1 \
-        libxcb-render-util0 \
-        libxcb-xinerama0 \
-        libxkbcommon-x11-0 \
-        locales \
-        python3 \
-        python3-pip \
-        qt6ct \
-        vim-tiny \
-        wget \
-        xz-utils \
- && apt-get install -y --no-install-recommends \
         dillo \
-        fonts-noto-cjk \
         kde-cli-tools \
-        libnss3-dev \
+        gcompat \
         libxcomposite-dev \
         libxdamage-dev \
-        libxi6 \
         libxkbfile-dev \
         libxrandr-dev \
-        libxrender1 \
-        libxtst6 \
+        python3 \
+        vim \
+        wget \
         xdg-desktop-portal-dev \
         xdg-desktop-portal-xapp \
         xdg-utils \
-        xfonts-intl-arabic \
-        xfonts-intl-asian \
-        xfonts-intl-chinese \
-        xfonts-intl-european \
-        xfonts-intl-japanese \
-        xfonts-intl-phonetic \
         xpdf \
- && apt-get autoclean \
- && apt-get clean
+ && apk cache clean
 
 FROM base-build
 RUN mkdir -vp /usr/share/desktop-directories/
-
-# set the locale to en_US.UTF-8
-RUN locale-gen && \
-    /usr/sbin/update-locale LC_ALL=C.utf8
 
 WORKDIR /tmp/build/
 RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
