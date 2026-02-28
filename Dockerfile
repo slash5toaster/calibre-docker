@@ -80,6 +80,6 @@ WORKDIR /opt/Books
 LABEL org.opencontainers.image.vendor=slash5toaster \
       org.opencontainers.image.authors=slash5toaster@gmail.com \
       org.opencontainers.image.ref.name=calibre \
-      org.opencontainers.image.version=9.3.1
+      org.opencontainers.image.version=9.4.0
 
 #### End of File, if this is missing the file has been truncated
