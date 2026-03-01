@@ -6,6 +6,7 @@ RUN --mount=type=cache,target=/etc/apk/cache,sharing=locked \
     --mount=type=cache,target=/var/cache/apk,sharing=locked \
     apk update \
  && apk add \
+        bubblewrap \
         ca-certificates \
         dillo \
         kde-cli-tools \
