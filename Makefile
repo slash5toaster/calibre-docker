@@ -36,10 +36,8 @@ endef
 # Define a different build call for docker
 #
 ifeq ($(shell basename $(DOCKER_BIN)), docker)
-    # Commands/definitions if true (no tab at the start of these lines)
     BUILD_CMD = buildx build
 else
-    # Commands/definitions if false
     BUILD_CMD = build
 endif
 
