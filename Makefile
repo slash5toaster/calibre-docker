@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 9.4.0
+CALIBRE_VERSION ?= 9.5.0
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
@@ -90,7 +90,6 @@ docker: ## Build the docker image locally.
 # 	$(DOCKER_BIN) buildx create --name buildx-multi-arch ; $(DOCKER_BIN) buildx use buildx-multi-arch
 
 docker-multi: ## Multi-platform build.
-	$(call setup-multi)
 	$(call run_hadolint)
 	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
@@ -107,7 +106,7 @@ docker-multi: ## Multi-platform build.
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          $(DOCKER_BIN) rmi $(CONTAINER_STRING)
-# 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+# 	destroy the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
 	@if [ "$(GIT_BRANCH)" = "main" ]; then \
 		echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
