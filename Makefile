@@ -112,6 +112,13 @@ destroy: ## obliterate the local image
 		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 	fi
 
+run-sif: ## launch shell into the container using apptainer
+	make sif
+	[ "${C_ID}" ] || \
+	$(APPTAINER_BIN) run \
+          --bind "$(shell pwd)":/opt/devel \
+          /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif
+
 run: ## launch shell into the container, with this directory mounted to /opt/devel/
 	[ "${C_IMAGES}" ] || \
 		make docker
