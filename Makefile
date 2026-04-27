@@ -114,7 +114,7 @@ destroy: ## obliterate the local image
 
 run-sif: ## launch shell into the container using apptainer
 	@[ -f source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif ] || $(MAKE) sif
-	$(APPTAINER_BIN) run \
+	$(APPTAINER_BIN) shell \
           --bind "$(shell pwd)":/opt/devel \
           source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif
 
