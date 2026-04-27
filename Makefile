@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 9.6.0
+CALIBRE_VERSION ?= 9.7.0
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
@@ -65,7 +65,7 @@ sif: ## Build a sif image directly
 	mkdir -vp  source/logs/ ; \
 	$(APPTAINER_BIN) build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-            -F /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif \
+            -F source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif \
             calibre.def \
 	| tee source/logs/sif-build-$(shell date +%F-%H%M).log
 
@@ -111,6 +111,12 @@ destroy: ## obliterate the local image
 		echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 	fi
+
+run-sif: ## launch shell into the container using apptainer
+	@[ -f source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif ] || $(MAKE) sif
+	$(APPTAINER_BIN) shell \
+          --bind "$(shell pwd)":/opt/devel \
+          source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif
 
 run: ## launch shell into the container, with this directory mounted to /opt/devel/
 	[ "${C_IMAGES}" ] || \
