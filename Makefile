@@ -65,7 +65,7 @@ sif: ## Build a sif image directly
 	mkdir -vp  source/logs/ ; \
 	$(APPTAINER_BIN) build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-            -F /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif \
+            -F source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif \
             calibre.def \
 	| tee source/logs/sif-build-$(shell date +%F-%H%M).log
 
@@ -113,10 +113,10 @@ destroy: ## obliterate the local image
 	fi
 
 run-sif: ## launch shell into the container using apptainer
-	@[ -f /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif ] || $(MAKE) sif
+	@[ -f source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif ] || $(MAKE) sif
 	$(APPTAINER_BIN) run \
           --bind "$(shell pwd)":/opt/devel \
-          /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif
+          source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif
 
 run: ## launch shell into the container, with this directory mounted to /opt/devel/
 	[ "${C_IMAGES}" ] || \
