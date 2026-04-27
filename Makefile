@@ -36,8 +36,10 @@ endef
 # Define a different build call for docker
 #
 ifeq ($(shell basename $(DOCKER_BIN)), docker)
+    # Commands/definitions if true (no tab at the start of these lines)
     BUILD_CMD = buildx build
 else
+    # Commands/definitions if false
     BUILD_CMD = build
 endif
 
@@ -58,6 +60,7 @@ envs: ## show the environments
 	$(info Project          - ${CONTAINER_PROJECT})
 	$(info Name             - ${CONTAINER_NAME})
 	$(info Tag is           - ${CONTAINER_TAG})
+	$(info Version is       - ${CALIBRE_VERSION})
 
 # Build apptainer/singularity
 #
@@ -65,7 +68,7 @@ sif: ## Build a sif image directly
 	mkdir -vp  source/logs/ ; \
 	$(APPTAINER_BIN) build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-            -F source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif \
+            -F source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif \
             calibre.def \
 	| tee source/logs/sif-build-$(shell date +%F-%H%M).log
 
@@ -86,15 +89,12 @@ docker: ## Build the docker image locally.
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	$(DOCKER_BIN) inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
-# setup-multi: ## setup docker multiplatform
-# 	$(DOCKER_BIN) buildx create --name buildx-multi-arch ; $(DOCKER_BIN) buildx use buildx-multi-arch
-
 docker-multi: ## Multi-platform build.
 	$(call run_hadolint)
 	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
 	$(DOCKER_BIN) $(BUILD_CMD) \
-		--platform linux/amd64,linux/arm64/v8 \
+                --platform linux/amd64,linux/arm64/v8 \
 		--cache-from $(CONTAINER_STRING) \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
@@ -106,17 +106,17 @@ docker-multi: ## Multi-platform build.
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          $(DOCKER_BIN) rmi $(CONTAINER_STRING)
-# 	destroy the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+    # destroy the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
 	@if [ "$(GIT_BRANCH)" = "main" ]; then \
 		echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 	fi
 
-run-sif: ## launch shell into the container using apptainer
-	@[ -f source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif ] || $(MAKE) sif
+run-sif: ## launch shell into the container using apptainer, with this directory mounted to /opt/source
+	@[ -f source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif ] || $(MAKE) sif
 	$(APPTAINER_BIN) shell \
           --bind "$(shell pwd)":/opt/devel \
-          source/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif
+          source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif
 
 run: ## launch shell into the container, with this directory mounted to /opt/devel/
 	[ "${C_IMAGES}" ] || \
