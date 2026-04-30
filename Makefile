@@ -61,6 +61,8 @@ envs: ## show the environments
 	$(info Name             - ${CONTAINER_NAME})
 	$(info Tag is           - ${CONTAINER_TAG})
 	$(info Version is       - ${CALIBRE_VERSION})
+	$(info Apptainer is     - ${APPTAINER_BIN})
+	$(info Docker is        - ${DOCKER_BIN})
 
 # Build apptainer/singularity
 #
@@ -94,7 +96,7 @@ docker-multi: ## Multi-platform build.
 	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
 	$(DOCKER_BIN) $(BUILD_CMD) \
-                --platform linux/amd64,linux/arm64/v8 \
+		--platform linux/amd64,linux/arm64/v8 \
 		--cache-from $(CONTAINER_STRING) \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
