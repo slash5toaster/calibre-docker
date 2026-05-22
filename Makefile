@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 9.7.0
+CALIBRE_VERSION ?= 9.8.0
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
@@ -100,7 +100,7 @@ docker-multi: ## Multi-platform build.
 		--cache-from $(CONTAINER_STRING) \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-		--label org.opencontainers.image.created=$(shell date +%F-%H%M) \
+		--label org.opencontainers.image.created=$(LOGDATE) \
 		-f Dockerfile . \
 		--progress plain 2>&1 \
 	| tee source/logs/build-multi-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
