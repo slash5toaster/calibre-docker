@@ -1,11 +1,12 @@
-FROM debian:unstable-slim
+FROM --platform=$BUILDPLATFORM debian:unstable-slim AS base-build
 
 ARG CALIBRE_VERSION
 
-# Otherwize you will get an interactive setup session
+# Otherwise you will get an interactive setup session
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -54,10 +55,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xpdf \
  && apt-get autoclean \
  && apt-get clean
- 
+
+FROM base-build
 RUN mkdir -vp /usr/share/desktop-directories/
-# register for pdf
-RUN xdg-mime default xpdf.desktop application/pdf
 
 # set the locale to en_US.UTF-8
 RUN locale-gen && \
@@ -65,7 +65,15 @@ RUN locale-gen && \
 
 WORKDIR /tmp/build/
 RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
-     wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
+     wget -c -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION} \
+     || exit 1
+
+# register for pdf
+RUN xdg-mime default calibre-ebook-viewer.desktop application/pdf
+
+# test that calibre got installed properly
+RUN type calibre || exit 1 \
+ && calibre --version
 
 COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 
