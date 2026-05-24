@@ -7,6 +7,10 @@ DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
 DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || exit)
 APPTAINER_BIN := $(shell type -p apptainer || type -p apptainer.lima || type -p singularity || exit)
+
+# info for pushing latest tag when on main branch
+GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+
 # Date for log files
 LOGDATE := $(shell date +%F-%H%M)
 
@@ -56,6 +60,9 @@ envs: ## show the environments
 	$(info Project          - ${CONTAINER_PROJECT})
 	$(info Name             - ${CONTAINER_NAME})
 	$(info Tag is           - ${CONTAINER_TAG})
+	$(info Version is       - ${CALIBRE_VERSION})
+	$(info Apptainer is     - ${APPTAINER_BIN})
+	$(info Docker is        - ${DOCKER_BIN})
 
 # Build apptainer/singularity
 #
@@ -63,7 +70,7 @@ sif: ## Build a sif image directly
 	mkdir -vp  source/logs/ ; \
 	$(APPTAINER_BIN) build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-            -F /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif \
+            -F source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif \
             calibre.def \
 	| tee source/logs/sif-build-$(shell date +%F-%H%M).log
 
@@ -80,14 +87,11 @@ docker: ## Build the docker image locally.
 		--cache-from $(CONTAINER_STRING) \
 		--progress plain \
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) 2>&1 \
+		-f Dockerfile . \
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	$(DOCKER_BIN) inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
-# setup-multi: ## setup docker multiplatform
-# 	$(DOCKER_BIN) buildx create --name buildx-multi-arch ; $(DOCKER_BIN) buildx use buildx-multi-arch
-
 docker-multi: ## Multi-platform build.
-	$(call setup-multi)
 	$(call run_hadolint)
 	git pull --recurse-submodules; \
 	mkdir -vp  source/logs/ ; \
@@ -96,7 +100,7 @@ docker-multi: ## Multi-platform build.
 		--cache-from $(CONTAINER_STRING) \
 		-t $(CONTAINER_STRING) \
 		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-		--label org.opencontainers.image.created=$(shell date +%F-%H%M) \
+		--label org.opencontainers.image.created=$(LOGDATE) \
 		-f Dockerfile . \
 		--progress plain 2>&1 \
 	| tee source/logs/build-multi-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
@@ -104,6 +108,17 @@ docker-multi: ## Multi-platform build.
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          $(DOCKER_BIN) rmi $(CONTAINER_STRING)
+    # destroy the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
+
+run-sif: ## launch shell into the container using apptainer, with this directory mounted to /opt/source
+	@[ -f source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif ] || $(MAKE) sif
+	$(APPTAINER_BIN) shell \
+          --bind "$(shell pwd)":/opt/devel \
+          source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif
 
 run: ## launch shell into the container, with this directory mounted to /opt/devel/
 	[ "${C_IMAGES}" ] || \
@@ -123,12 +138,23 @@ run: ## launch shell into the container, with this directory mounted to /opt/dev
 pull: ## Pull Docker image
 	@echo 'pulling $(CONTAINER_STRING)'
 	$(DOCKER_BIN) pull $(CONTAINER_STRING)
+# 	also latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		$(DOCKER_BIN) pull $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
-publish: ## Push server image to remote
+publish: ## Push server image to remote, if on main, publish latest tag
 	[ "${C_IMAGES}" ] || \
 		make docker
-	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'
+	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'; \
 	$(DOCKER_BIN) push --all-platforms $(CONTAINER_STRING)
+
+# 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+		$(DOCKER_BIN) push --all-platforms $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
 docker-lint: ## Check files for errors
 	$(call run_hadolint)
