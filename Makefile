@@ -2,17 +2,22 @@ SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
 CALIBRE_VERSION ?= 6.29.0
-DOCKER_REPO ?= localhost
-D2S_VERSION ?= v3.9.4
+
+DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
+DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || exit)
+APPTAINER_BIN := $(shell type -p apptainer || type -p apptainer.lima || type -p singularity || exit)
+
+# info for pushing latest tag when on main branch
+GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 # Date for log files
 LOGDATE := $(shell date +%F-%H%M)
 
 # pull the name from the docker file - these labels *MUST* be set
-CONTAINER_PROJECT ?= $(shell grep LABEL Dockerfile | grep -i project | cut -d = -f2 | tr -d '"')
-CONTAINER_NAME ?= $(shell grep LABEL Dockerfile | grep -i name | cut -d = -f2 | tr -d '"')
-CONTAINER_TAG ?= $(shell grep LABEL Dockerfile | grep -i version | cut -d = -f2| tr -d '"')
+CONTAINER_PROJECT ?= $(shell grep org.opencontainers.image.vendor Dockerfile | cut -d = -f2 |  tr -d '"\\ ')
+CONTAINER_NAME ?= $(shell grep org.opencontainers.image.ref.name Dockerfile  | cut -d = -f2 |  tr -d '"\\ ')
+CONTAINER_TAG ?= $(shell grep org.opencontainers.image.version Dockerfile    | cut -d = -f2 |  tr -d '"\\ ')
 CONTAINER_STRING ?= $(CONTAINER_PROJECT)/$(CONTAINER_NAME):$(CONTAINER_TAG)
 
 C_ID = $(shell ${GET_ID})
@@ -22,11 +27,22 @@ C_IMAGES = $(shell ${GET_IMAGES})
 define run_hadolint
 	@echo ''
 	@echo '> Dockerfile$(1) ==========='
-	docker run --rm -i \
+	$(DOCKER_BIN) run --rm -i \
 	-e HADOLINT_FAILURE_THRESHOLD=error \
 	-e HADOLINT_IGNORE=DL3042,DL3008,DL3015,DL3048 \
 	hadolint/hadolint < Dockerfile$(1)
 endef
+
+# Define a different build call for docker
+#
+ifeq ($(shell basename $(DOCKER_BIN)), docker)
+    # Commands/definitions if true (no tab at the start of these lines)
+    BUILD_CMD = buildx build
+else
+    # Commands/definitions if false
+    BUILD_CMD = build
+endif
+
 
 # HELP
 # https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
@@ -37,80 +53,114 @@ help: ## This help.
 
 .DEFAULT_GOAL := help
 
+# just show the details
+#
 envs: ## show the environments
-	$(shell echo -e "${CONTAINER_STRING}\n\t${CONTAINER_PROJECT}\n\t${CONTAINER_NAME}\n\t${CONTAINER_TAG}")
+	$(info Container String - ${CONTAINER_STRING})
+	$(info Project          - ${CONTAINER_PROJECT})
+	$(info Name             - ${CONTAINER_NAME})
+	$(info Tag is           - ${CONTAINER_TAG})
+	$(info Version is       - ${CALIBRE_VERSION})
+	$(info Apptainer is     - ${APPTAINER_BIN})
+	$(info Docker is        - ${DOCKER_BIN})
 
-local: ## Build the image locally.
+# Build apptainer/singularity
+#
+sif: ## Build a sif image directly
+	mkdir -vp  source/logs/ ; \
+	$(APPTAINER_BIN) build \
+            --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
+            -F source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif \
+            calibre.def \
+	| tee source/logs/sif-build-$(shell date +%F-%H%M).log
+
+# Build docker/OCI container locally
+#
+docker: ## Build the docker image locally.
+	$(call run_hadolint)
+	git pull --recurse-submodules;\
 	mkdir -vp source/logs/ ; \
 	DOCKER_BUILDKIT=1 \
-	docker build . \
-			--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-			--cache-from $(CONTAINER_STRING) \
-			-t $(CONTAINER_STRING) \
-			--progress plain \
-			--label BUILDDATE=$(LOGDATE) 2>&1 \
+	$(DOCKER_BIN) $(BUILD_CMD) \
+		-t $(CONTAINER_STRING) \
+		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
+		--cache-from $(CONTAINER_STRING) \
+		--progress plain \
+		--label org.opencontainers.image.created=$(shell date +%F-%H%M) 2>&1 \
+		-f Dockerfile . \
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
-	docker inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
+	$(DOCKER_BIN) inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
+
+docker-multi: ## Multi-platform build.
+	$(call run_hadolint)
+	git pull --recurse-submodules; \
+	mkdir -vp  source/logs/ ; \
+	$(DOCKER_BIN) $(BUILD_CMD) \
+		--platform linux/amd64,linux/arm64/v8 \
+		--cache-from $(CONTAINER_STRING) \
+		-t $(CONTAINER_STRING) \
+		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
+		--label org.opencontainers.image.created=$(LOGDATE) \
+		-f Dockerfile . \
+		--progress plain 2>&1 \
+	| tee source/logs/build-multi-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
-         docker rmi $(CONTAINER_STRING)
+         $(DOCKER_BIN) rmi $(CONTAINER_STRING)
+    # destroy the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
-singularity: local ## Create a singularity version.
-	docker run \
-			-v /var/run/docker.sock:/var/run/docker.sock \
-			-v $(shell pwd)/source:/output \
-			--privileged \
-			-t \
-			--rm \
-			quay.io/singularity/docker2singularity:$(D2S_VERSION) \
-			$(CONTAINER_STRING)
+run-sif: ## launch shell into the container using apptainer, with this directory mounted to /opt/source
+	@[ -f source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif ] || $(MAKE) sif
+	$(APPTAINER_BIN) shell \
+          --bind "$(shell pwd)":/opt/devel \
+          source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif
 
-apptainer: ## Build an apptainer sif image directly
-	apptainer build \
-            --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
-            /tmp/$(CONTAINER_NAME)_$(CALIBRE_VERSION).sif calibre.def
-
-run: ## run the image
+run: ## launch shell into the container, with this directory mounted to /opt/devel/
 	[ "${C_IMAGES}" ] || \
-		make local
+		make docker
 	[ "${C_ID}" ] || \
-	docker run \
-		--rm \
-		--detach \
-		-e TZ=PST8PDT \
-		-v "$(shell pwd)":/opt/devel \
-		--name $(CONTAINER_NAME) \
-		--hostname=$(CONTAINER_NAME)-$(CONTAINER_TAG) \
-		--publish $(EXPOSED_PORT):$(EXPOSED_PORT) \
-			$(CONTAINER_STRING)
+	$(DOCKER_BIN) run \
+          --rm \
+          -it \
+          -e TZ=PST8PDT \
+          --entrypoint /bin/bash \
+          -v "$(shell pwd)":/opt/devel \
+          --name $(CONTAINER_NAME) \
+          --hostname=$(CONTAINER_NAME) \
+          --publish $(EXPOSED_PORT):$(EXPOSED_PORT) \
+          $(CONTAINER_STRING)
 
-shell: run ## shell in server image.
-	[ "${C_ID}" ] || \
-		make run
-	docker exec \
-		-it \
-		-e DEBUG=0 \
-		-e TZ=PST8PDT \
-		--user root:root \
-		$(CONTAINER_NAME) /bin/bash
+pull: ## Pull Docker image
+	@echo 'pulling $(CONTAINER_STRING)'
+	$(DOCKER_BIN) pull $(CONTAINER_STRING)
+# 	also latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		$(DOCKER_BIN) pull $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
-kill: ## shutdown
-	[ "${C_ID}" ] || \
-	docker kill $(CONTAINER_NAME) && \
-	docker rm $(CONTAINER_NAME)
-
-publish: ## Push server image to remote
+publish: ## Push server image to remote, if on main, publish latest tag
 	[ "${C_IMAGES}" ] || \
-		make local
-	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'
-	docker push $(CONTAINER_STRING)
+		make docker
+	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'; \
+	$(DOCKER_BIN) push --all-platforms $(CONTAINER_STRING)
+
+# 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+		$(DOCKER_BIN) push --all-platforms $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
 docker-lint: ## Check files for errors
 	$(call run_hadolint)
 
 # Commands for extracting information on the running container
-GET_IMAGES := docker images ${CONTAINER_STRING} --format "{{.ID}}"
-GET_CONTAINER := docker ps -a --filter "name=${CONTAINER_NAME}" --no-trunc
+GET_IMAGES := $(DOCKER_BIN) images ${CONTAINER_STRING} --format "{{.ID}}"
+GET_CONTAINER := $(DOCKER_BIN) ps -a --filter "name=${CONTAINER_NAME}" --no-trunc
 GET_ID := ${GET_CONTAINER} --format {{.ID}}
 GET_STATUS := ${GET_CONTAINER} --format {{.Status}} | cut -d " " -f1

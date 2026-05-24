@@ -1,11 +1,12 @@
-FROM debian:unstable-slim
+FROM --platform=$BUILDPLATFORM debian:unstable-slim AS base-build
 
 ARG CALIBRE_VERSION
 
-# Otherwize you will get an interactive setup session
+# Otherwise you will get an interactive setup session
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -13,23 +14,27 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
  && apt-get install -y \
         ca-certificates \
         libegl1 \
-        libfontconfig \
         libfontconfig1 \
         libglx0 \
         libopengl0 \
+        libxcb-cursor0 \
         libxcb-icccm4 \
         libxcb-image0 \
         libxcb-keysyms1 \
         libxcb-render-util0 \
         libxcb-xinerama0 \
         libxkbcommon-x11-0 \
+        locales \
         python3 \
         python3-pip \
         qt6ct \
+        vim-tiny \
         wget \
         xz-utils \
  && apt-get install -y --no-install-recommends \
+        dillo \
         fonts-noto-cjk \
+        kde-cli-tools \
         libnss3-dev \
         libxcomposite-dev \
         libxdamage-dev \
@@ -47,12 +52,28 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xfonts-intl-european \
         xfonts-intl-japanese \
         xfonts-intl-phonetic \
+        xpdf \
  && apt-get autoclean \
  && apt-get clean
 
- RUN mkdir -vp /usr/share/desktop-directories/
+FROM base-build
+RUN mkdir -vp /usr/share/desktop-directories/
 
-RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION}
+# set the locale to en_US.UTF-8
+RUN locale-gen && \
+    /usr/sbin/update-locale LC_ALL=C.utf8
+
+WORKDIR /tmp/build/
+RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
+     wget -c -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=${CALIBRE_VERSION} \
+     || exit 1
+
+# register for pdf
+RUN xdg-mime default calibre-ebook-viewer.desktop application/pdf
+
+# test that calibre got installed properly
+RUN type calibre || exit 1 \
+ && calibre --version
 
 COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 
@@ -60,11 +81,9 @@ COPY calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 # ENTRYPOINT ["calibre"]
 
 # Mandatory Labels
-LABEL project=slash5toaster
-LABEL org.opencontainers.image.authors="slash5toaster@gmail.com"
-LABEL name=calibre
-LABEL version=6.29.0
-LABEL generate_apptainer_image=true
-LABEL production=true
+LABEL org.opencontainers.image.vendor=slash5toaster \
+      org.opencontainers.image.authors=slash5toaster@gmail.com \
+      org.opencontainers.image.ref.name=calibre \
+      org.opencontainers.image.version=9.8.0
 
 #### End of File, if this is missing the file has been truncated
