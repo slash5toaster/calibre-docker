@@ -5,8 +5,8 @@ CALIBRE_VERSION ?= 9.9.0
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
-DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || exit)
-APPTAINER_BIN := $(shell type -p apptainer || type -p apptainer.lima || type -p singularity || exit)
+DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || echo noop )
+APPTAINER_BIN := $(shell type -p apptainer || type -p apptainer.lima || type -p singularity || echo noop)
 
 # info for pushing latest tag when on main branch
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
