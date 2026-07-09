@@ -1,11 +1,11 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 9.9.0
+CALIBRE_VERSION ?= 9.11.0
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
-DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || echo noop )
+DOCKER_BIN := $(shell type -p nerdctl || type -p docker || type -p nerdctl.lima || echo noop )
 APPTAINER_BIN := $(shell type -p apptainer || type -p apptainer.lima || type -p singularity || echo noop)
 
 # info for pushing latest tag when on main branch
@@ -147,13 +147,15 @@ publish: ## Push server image to remote, if on main, publish latest tag
 	[ "${C_IMAGES}" ] || \
 		make docker
 	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'; \
-	$(DOCKER_BIN) push --all-platforms $(CONTAINER_STRING)
+	$(DOCKER_BIN) tag $(CONTAINER_STRING) $(DOCKER_REPO)/$(CONTAINER_STRING) ; \
+	$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_STRING)
 
 # 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
 	@if [ "$(GIT_BRANCH)" = "main" ]; then \
 		echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
-		$(DOCKER_BIN) push --all-platforms $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(DOCKER_REPO)/$(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+		$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 	fi
 
 docker-lint: ## Check files for errors
