@@ -48,9 +48,9 @@ Stage: spython-base
         libxrandr-dev \
         libxrender1 \
         libxtst6 \
-        xdg-desktop-portal-dev \
-        xdg-desktop-portal-xapp \
-        xdg-utils \
+#        xdg-desktop-portal-dev \
+#        xdg-desktop-portal-xapp \
+#        xdg-utils \
         xfonts-intl-arabic \
         xfonts-intl-asian \
         xfonts-intl-chinese \
@@ -68,7 +68,7 @@ Stage: spython-base
     || exit 2
 
     # register for pdf
-    xdg-mime default calibre-ebook-viewer.desktop application/pdf
+    # xdg-mime default calibre-ebook-viewer.desktop application/pdf
 
 %test
    type calibre || exit 1
