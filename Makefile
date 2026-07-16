@@ -83,8 +83,8 @@ docker: ## Build the docker image locally.
 	DOCKER_BUILDKIT=1 \
 	$(DOCKER_BIN) $(BUILD_CMD) \
 		-t $(CONTAINER_STRING) \
-		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--cache-from $(CONTAINER_STRING) \
+		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--progress plain \
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) 2>&1 \
 		-f Dockerfile . \
@@ -108,7 +108,7 @@ docker-multi: ## Multi-platform build.
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          $(DOCKER_BIN) rmi $(CONTAINER_STRING)
-    # destroy the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+# destroy the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
 	@if [ "$(GIT_BRANCH)" = "main" ]; then \
 		echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
