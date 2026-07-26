@@ -1,9 +1,9 @@
 Bootstrap: docker
-From: debian:unstable-slim
+From: debian:stable-slim
 Stage: spython-base
 
 %arguments
-   CALIBRE_VERSION=9.9.0
+   CALIBRE_VERSION=9.11.0
 
 %files
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
