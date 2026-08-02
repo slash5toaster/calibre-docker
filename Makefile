@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 9.11.0
+CALIBRE_VERSION ?= 9.12.0
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
@@ -71,7 +71,7 @@ sif: ## Build a sif image directly
 	$(APPTAINER_BIN) build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
             -F source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif \
-            calibre.def \
+            ${CONTAINER_NAME}.def \
 	| tee source/logs/sif-build-$(shell date +%F-%H%M).log
 
 # Build docker/OCI container locally
