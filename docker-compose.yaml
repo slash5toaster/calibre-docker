@@ -5,10 +5,10 @@ services:
     # Optional - specify the uid and gid you would like to use instead of root
     # user: uid:gid
     ports:
-      - 18080:18080/tcp
+      - 8321:8321/tcp
     volumes:
       - type: bind
-        source: "$HOME/Calibre\ Library/"
-        target: "$HOME/Calibre\ Library/"
-    entrypoint: ["calibre-server", "--port", "18080", "$HOME/Calibre\ Library/"]
+        source: "/opt/Books/"
+        target: "/opt/Books/"
+    entrypoint: ["calibre-server", "--port", "8321", "/opt/Books/"]
     restart: 'unless-stopped'
