@@ -1,6 +1,6 @@
 services:
   calibre-server:
-    image: slash5toaster/calibre:latest
+    image: slash5toaster/calibre:9.13.0
     container_name: calibre-server
     # Optional - specify the uid and gid you would like to use instead of root
     # user: uid:gid
