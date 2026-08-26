@@ -11,7 +11,8 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean; \
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update \
- && apt-get install -y \
+ && apt-get install -y -qq \
+        apt-transport-https \
         ca-certificates \
         libegl1 \
         libfontconfig1 \
@@ -30,9 +31,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         qt6ct \
         vim-tiny \
         wget \
-        xz-utils \
- && apt-get install -y --no-install-recommends \
-        dillo \
+        xz-utils
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get install -y --no-install-recommends -q \
         fonts-noto-cjk \
         kde-cli-tools \
         libnss3-dev \

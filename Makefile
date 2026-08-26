@@ -5,8 +5,8 @@ CALIBRE_VERSION ?= 8.16.2
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
-DOCKER_BIN := $(shell type -p docker || type -p nerdctl || type -p nerdctl.lima || exit)
-APPTAINER_BIN := $(shell type -p apptainer || type -p apptainer.lima || type -p singularity || exit)
+DOCKER_BIN := $(shell type -p nerdctl || type -p docker || type -p nerdctl.lima || echo noop )
+APPTAINER_BIN := $(shell type -p apptainer || type -p apptainer.lima || type -p singularity || echo noop)
 
 # info for pushing latest tag when on main branch
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
@@ -71,7 +71,7 @@ sif: ## Build a sif image directly
 	$(APPTAINER_BIN) build \
             --build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
             -F source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif \
-            calibre.def \
+            ${CONTAINER_NAME}.def \
 	| tee source/logs/sif-build-$(shell date +%F-%H%M).log
 
 # Build docker/OCI container locally
@@ -83,8 +83,8 @@ docker: ## Build the docker image locally.
 	DOCKER_BUILDKIT=1 \
 	$(DOCKER_BIN) $(BUILD_CMD) \
 		-t $(CONTAINER_STRING) \
-		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--cache-from $(CONTAINER_STRING) \
+		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--progress plain \
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) 2>&1 \
 		-f Dockerfile . \
@@ -108,7 +108,7 @@ docker-multi: ## Multi-platform build.
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          $(DOCKER_BIN) rmi $(CONTAINER_STRING)
-    # destroy the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+# destroy the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
 	@if [ "$(GIT_BRANCH)" = "main" ]; then \
 		echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
@@ -147,13 +147,15 @@ publish: ## Push server image to remote, if on main, publish latest tag
 	[ "${C_IMAGES}" ] || \
 		make docker
 	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'; \
-	$(DOCKER_BIN) push --all-platforms $(CONTAINER_STRING)
+	$(DOCKER_BIN) tag $(CONTAINER_STRING) $(DOCKER_REPO)/$(CONTAINER_STRING) ; \
+	$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_STRING)
 
 # 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
 	@if [ "$(GIT_BRANCH)" = "main" ]; then \
 		echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
-		$(DOCKER_BIN) push --all-platforms $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(DOCKER_REPO)/$(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+		$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 	fi
 
 docker-lint: ## Check files for errors
