@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 9.13.0
+CALIBRE_VERSION ?= 9.14.0
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
@@ -91,6 +91,10 @@ docker: ## Build the docker image locally.
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	$(DOCKER_BIN) inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest;
+	fi
 docker-multi: ## Multi-platform build.
 	$(call run_hadolint)
 	git pull --recurse-submodules; \
@@ -104,6 +108,11 @@ docker-multi: ## Multi-platform build.
 		-f Dockerfile . \
 		--progress plain 2>&1 \
 	| tee source/logs/build-multi-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
+
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest;
+	fi
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
