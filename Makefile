@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 # Docker repository for tagging and publishing
-CALIBRE_VERSION ?= 9.13.0
+CALIBRE_VERSION ?= 9.14.0
 
 DOCKER_REPO ?= docker.io
 EXPOSED_PORT ?= 8321
@@ -151,12 +151,12 @@ publish: ## Push server image to remote, if on main, publish latest tag
 	$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_STRING)
 
 # 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
-	@if [ "$(GIT_BRANCH)" = "main" ]; then \
-		echo "On main branch. Updating 'latest' tag..."; \
+	ifeq ("$(GIT_BRANCH)","main" )
+		@echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(DOCKER_REPO)/$(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 		$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
-	fi
+	endfi
 
 docker-lint: ## Check files for errors
 	$(call run_hadolint)
