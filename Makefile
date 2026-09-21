@@ -91,10 +91,11 @@ docker: ## Build the docker image locally.
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	$(DOCKER_BIN) inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
-	@if [ "$(GIT_BRANCH)" = "main" ]; then \
-		echo "On main branch. Updating 'latest' tag..."; \
-		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest;
-	fi
+	ifeq ($(GIT_BRANCH),main)
+		echo "On main branch. Updating 'latest' tag..."
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
+	endif
+
 docker-multi: ## Multi-platform build.
 	$(call run_hadolint)
 	git pull --recurse-submodules; \
@@ -109,19 +110,19 @@ docker-multi: ## Multi-platform build.
 		--progress plain 2>&1 \
 	| tee source/logs/build-multi-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
-	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+	ifeq ($(GIT_BRANCH),main)
 		echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest;
-	fi
+	endif
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
          $(DOCKER_BIN) rmi $(CONTAINER_STRING)
 # destroy the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
-	@if [ "$(GIT_BRANCH)" = "main" ]; then \
-		echo "On main branch. Updating 'latest' tag..."; \
+	ifeq ("$(GIT_BRANCH)","main" )
+		@echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) rmi  $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
-	fi
+	endif
 
 run-sif: ## launch shell into the container using apptainer, with this directory mounted to /opt/source
 	@[ -f source/$(CONTAINER_NAME)_$(CONTAINER_TAG).sif ] || $(MAKE) sif
@@ -148,9 +149,9 @@ pull: ## Pull Docker image
 	@echo 'pulling $(CONTAINER_STRING)'
 	$(DOCKER_BIN) pull $(CONTAINER_STRING)
 # 	also latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
-	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+	ifeq ("$(GIT_BRANCH)","main" )
 		$(DOCKER_BIN) pull $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
-	fi
+	endif
 
 publish: ## Push server image to remote, if on main, publish latest tag
 	[ "${C_IMAGES}" ] || \
@@ -160,12 +161,12 @@ publish: ## Push server image to remote, if on main, publish latest tag
 	$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_STRING)
 
 # 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
-	@if [ "$(GIT_BRANCH)" = "main" ]; then \
-		echo "On main branch. Updating 'latest' tag..."; \
+	ifeq ($(GIT_BRANCH),main)
+		@echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(DOCKER_REPO)/$(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 		$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
-	fi
+	endif
 
 docker-lint: ## Check files for errors
 	$(call run_hadolint)
