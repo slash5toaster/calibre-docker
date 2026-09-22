@@ -91,10 +91,10 @@ docker: ## Build the docker image locally.
 	| tee source/logs/build-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log ;\
 	$(DOCKER_BIN) inspect $(CONTAINER_STRING) > source/logs/inspect-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
-	ifeq ($(GIT_BRANCH),main)
-		echo "On main branch. Updating 'latest' tag..."
-		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
-	endif
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
+		echo "On main branch. Updating 'latest' tag..."; \
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
 docker-multi: ## Multi-platform build.
 	$(call run_hadolint)
@@ -110,10 +110,10 @@ docker-multi: ## Multi-platform build.
 		--progress plain 2>&1 \
 	| tee source/logs/build-multi-$(CONTAINER_PROJECT)-$(CONTAINER_NAME)_$(CONTAINER_TAG)-$(LOGDATE).log
 
-	ifeq ($(GIT_BRANCH),main)
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
 		echo "On main branch. Updating 'latest' tag..."; \
-		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest;
-	endif
+		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
+	fi
 
 destroy: ## obliterate the local image
 	[ "${C_IMAGES}" == "" ] || \
@@ -161,12 +161,12 @@ publish: ## Push server image to remote, if on main, publish latest tag
 	$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_STRING)
 
 # 	publish the latest tag as $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest
-	ifeq ($(GIT_BRANCH),main)
+	@if [ "$(GIT_BRANCH)" = "main" ]; then \
 		@echo "On main branch. Updating 'latest' tag..."; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 		$(DOCKER_BIN) tag $(CONTAINER_STRING) $(DOCKER_REPO)/$(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
 		$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_PROJECT)/$(CONTAINER_NAME):latest; \
-	endif
+	if
 
 docker-lint: ## Check files for errors
 	$(call run_hadolint)
