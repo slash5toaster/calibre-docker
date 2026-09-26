@@ -156,7 +156,6 @@ pull: ## Pull Docker image
 publish: ## Push server image to remote, if on main, publish latest tag
 	[ "${C_IMAGES}" ] || \
 		make docker
-	@echo 'pushing $(CONTAINER_STRING) to $(DOCKER_REPO)'; \
 	$(DOCKER_BIN) tag $(CONTAINER_STRING) $(DOCKER_REPO)/$(CONTAINER_STRING) ; \
 	$(DOCKER_BIN) push --all-platforms $(DOCKER_REPO)/$(CONTAINER_STRING)
 
