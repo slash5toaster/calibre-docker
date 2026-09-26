@@ -3,7 +3,7 @@ From: debian:stable-slim
 Stage: spython-base
 
 %arguments
-   CALIBRE_VERSION=9.14.0
+   CALIBRE_VERSION=9.15.0
 
 %files
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
@@ -16,7 +16,7 @@ Stage: spython-base
 
 %post
     apt-get update \
- && apt-get install -y \
+ && apt-get install -qq -y \
         ca-certificates \
         libegl1 \
         libfontconfig1 \
@@ -36,7 +36,7 @@ Stage: spython-base
         vim-tiny \
         wget \
         xz-utils \
- && apt-get install -y --no-install-recommends \
+ && apt-get install -qq -y --no-install-recommends \
         dillo \
         fonts-noto-cjk \
         kde-cli-tools \
