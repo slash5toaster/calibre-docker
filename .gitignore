@@ -1,0 +1,5 @@
+*.swp
+*~
+.vscode/
+settings.json
+megalinter-reports

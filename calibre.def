@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: debian:unstable-slim
+From: debian:stable-slim
 Stage: spython-base
 
 %arguments
@@ -9,34 +9,37 @@ Stage: spython-base
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
 
 %labels
-   project=slash5toaster
-   org.opencontainers.image.authors="slash5toaster@gmail.com"
-   name=calibre
-   version={{ CALIBRE_VERSION }}
-   production=false
+   org.opencontainers.image.vendor=slash5toaster
+   org.opencontainers.image.authors=slash5toaster@gmail.com
+   org.opencontainers.image.ref.name=calibre
+   org.opencontainers.image.version={{ CALIBRE_VERSION }}
 
 %post
     apt-get update \
- && apt-get install -y \
+ && apt-get install -qq -y \
         ca-certificates \
         libegl1 \
-        libfontconfig \
         libfontconfig1 \
         libglx0 \
         libopengl0 \
+        libxcb-cursor0 \
         libxcb-icccm4 \
         libxcb-image0 \
         libxcb-keysyms1 \
         libxcb-render-util0 \
         libxcb-xinerama0 \
         libxkbcommon-x11-0 \
+        locales \
         python3 \
         python3-pip \
         qt6ct \
+        vim-tiny \
         wget \
         xz-utils \
- && apt-get install -y --no-install-recommends \
+ && apt-get install -qq -y --no-install-recommends \
+        dillo \
         fonts-noto-cjk \
+        kde-cli-tools \
         libnss3-dev \
         libxcomposite-dev \
         libxdamage-dev \
@@ -54,11 +57,22 @@ Stage: spython-base
         xfonts-intl-european \
         xfonts-intl-japanese \
         xfonts-intl-phonetic \
+        xpdf \
  && apt-get autoclean \
  && apt-get clean
-
     mkdir -vp /usr/share/desktop-directories/
-    wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }}
+    locale-gen
+    /usr/sbin/update-locale LC_ALL=C.utf8
+
+    wget -c -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version={{ CALIBRE_VERSION }} \
+    || exit 2
+
+    # register for pdf
+    xdg-mime default calibre-ebook-viewer.desktop application/pdf
+
+%test
+   type calibre || exit 1
+   calibre --version
 
 %runscript
    exec "$@"
