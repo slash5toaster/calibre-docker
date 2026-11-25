@@ -55,7 +55,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xfonts-intl-japanese \
         xfonts-intl-phonetic \
         xpdf \
-        zathura \
  && apt-get autoclean \
  && apt-get clean
 
