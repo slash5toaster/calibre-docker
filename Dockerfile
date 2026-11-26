@@ -34,7 +34,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xz-utils
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get install -y --no-install-recommends -q \
+    apt-get install -qq -y --no-install-recommends \
         fonts-noto-cjk \
         kde-cli-tools \
         libnss3-dev \
@@ -45,6 +45,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libxrandr-dev \
         libxrender1 \
         libxtst6 \
+        mupdf \
         xdg-desktop-portal-dev \
         xdg-desktop-portal-xapp \
         xdg-utils \
@@ -71,7 +72,9 @@ RUN --mount=type=cache,target=/tmp/build/,sharing=locked \
      || exit 1
 
 # register for pdf
-RUN xdg-mime default calibre-ebook-viewer.desktop application/pdf
+RUN xdg-mime default calibre-ebook-viewer.desktop application/x-mobipocket-ebook ;\
+    xdg-mime default mupdf.desktop application/pdf
+
 
 # test that calibre got installed properly
 RUN type calibre || exit 1 \
