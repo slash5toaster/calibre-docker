@@ -3,7 +3,7 @@ From: debian:stable-slim
 Stage: spython-base
 
 %arguments
-   CALIBRE_VERSION=9.18.0
+   CALIBRE_VERSION=9.19.0
 
 %files
    calibre_backups/calibre_backup.sh /usr/local/bin/calibre_backup.sh
@@ -16,7 +16,8 @@ Stage: spython-base
 
 %post
     apt-get update \
- && apt-get install -qq -y \
+ && apt-get install -y -qq \
+        apt-transport-https \
         ca-certificates \
         libegl1 \
         libfontconfig1 \
@@ -37,7 +38,6 @@ Stage: spython-base
         wget \
         xz-utils \
  && apt-get install -qq -y --no-install-recommends \
-        dillo \
         fonts-noto-cjk \
         kde-cli-tools \
         libnss3-dev \
@@ -48,6 +48,7 @@ Stage: spython-base
         libxrandr-dev \
         libxrender1 \
         libxtst6 \
+        mupdf \
         xdg-desktop-portal-dev \
         xdg-desktop-portal-xapp \
         xdg-utils \
@@ -68,7 +69,8 @@ Stage: spython-base
     || exit 2
 
     # register for pdf
-    xdg-mime default calibre-ebook-viewer.desktop application/pdf
+    xdg-mime default mupdf.desktop application/pdf
+    # xdg-mime default calibre-ebook-viewer.desktop application/pdf
 
 %test
    type calibre || exit 1
