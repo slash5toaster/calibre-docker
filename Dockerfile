@@ -34,7 +34,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         xz-utils
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get install -y --no-install-recommends -q \
+    apt-get install -qq -y --no-install-recommends \
         fonts-noto-cjk \
         kde-cli-tools \
         libnss3-dev \

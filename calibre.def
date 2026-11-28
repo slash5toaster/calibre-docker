@@ -16,7 +16,8 @@ Stage: spython-base
 
 %post
     apt-get update \
- && apt-get install -qq -y \
+ && apt-get install -y -qq \
+        apt-transport-https \
         ca-certificates \
         libegl1 \
         libfontconfig1 \

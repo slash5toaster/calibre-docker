@@ -83,8 +83,8 @@ docker: ## Build the docker image locally.
 	DOCKER_BUILDKIT=1 \
 	$(DOCKER_BIN) $(BUILD_CMD) \
 		-t $(CONTAINER_STRING) \
-		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--cache-from $(CONTAINER_STRING) \
+		--build-arg CALIBRE_VERSION=$(CALIBRE_VERSION) \
 		--progress plain \
 		--label org.opencontainers.image.created=$(shell date +%F-%H%M) 2>&1 \
 		-f Dockerfile . \
